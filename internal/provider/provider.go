@@ -14,20 +14,20 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/auth"
-	vaultclient "github.com/hashicorp/vault-csi-provider/internal/client"
-	"github.com/hashicorp/vault-csi-provider/internal/clientcache"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
-	hmacgen "github.com/hashicorp/vault-csi-provider/internal/hmac"
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao-csi-provider/internal/auth"
+	openbaoclient "github.com/openbao/openbao-csi-provider/internal/client"
+	"github.com/openbao/openbao-csi-provider/internal/clientcache"
+	"github.com/openbao/openbao-csi-provider/internal/config"
+	hmacgen "github.com/openbao/openbao-csi-provider/internal/hmac"
+	"github.com/openbao/openbao/api"
 	pb "sigs.k8s.io/secrets-store-csi-driver/provider/v1alpha1"
 )
 
 // provider implements the secrets-store-csi-driver provider interface
-// and communicates with the Vault API.
+// and communicates with the Openbao API.
 type provider struct {
 	logger             hclog.Logger
-	vaultResponseCache map[vaultResponseCacheKey]*api.Secret
+	openbaoResponseCache map[openbaoResponseCacheKey]*api.Secret
 
 	// Allows mocking Kubernetes API for tests.
 	authMethod    *auth.KubernetesJWTAuth
@@ -38,7 +38,7 @@ type provider struct {
 func NewProvider(logger hclog.Logger, authMethod *auth.KubernetesJWTAuth, hmacGenerator *hmacgen.HMACGenerator, clientCache *clientcache.ClientCache) *provider {
 	p := &provider{
 		logger:             logger,
-		vaultResponseCache: make(map[vaultResponseCacheKey]*api.Secret),
+		openbaoResponseCache: make(map[openbaoResponseCacheKey]*api.Secret),
 
 		authMethod:    authMethod,
 		hmacGenerator: hmacGenerator,
@@ -48,7 +48,7 @@ func NewProvider(logger hclog.Logger, authMethod *auth.KubernetesJWTAuth, hmacGe
 	return p
 }
 
-type vaultResponseCacheKey struct {
+type openbaoResponseCacheKey struct {
 	secretPath string
 	method     string
 }
@@ -105,11 +105,11 @@ func decodeValue(data []byte, encoding string) ([]byte, error) {
 	return nil, fmt.Errorf("invalid encoding type. Should be utf-8, base64, or hex")
 }
 
-func (p *provider) getSecret(ctx context.Context, client *vaultclient.Client, secretConfig config.Secret) ([]byte, error) {
+func (p *provider) getSecret(ctx context.Context, client *openbaoclient.Client, secretConfig config.Secret) ([]byte, error) {
 	var secret *api.Secret
 	var cached bool
-	key := vaultResponseCacheKey{secretPath: secretConfig.SecretPath, method: secretConfig.Method}
-	if secret, cached = p.vaultResponseCache[key]; !cached {
+	key := openbaoResponseCacheKey{secretPath: secretConfig.SecretPath, method: secretConfig.Method}
+	if secret, cached = p.openbaoResponseCache[key]; !cached {
 		var err error
 		secret, err = client.RequestSecret(ctx, p.authMethod, secretConfig)
 		if err != nil {
@@ -120,10 +120,10 @@ func (p *provider) getSecret(ctx context.Context, client *vaultclient.Client, se
 		}
 
 		for _, w := range secret.Warnings {
-			p.logger.Warn("Warning in response from Vault API", "warning", w)
+			p.logger.Warn("Warning in response from Openbao API", "warning", w)
 		}
 
-		p.vaultResponseCache[key] = secret
+		p.openbaoResponseCache[key] = secret
 	} else {
 		p.logger.Debug("Secret fetched from cache", "secretConfig", secretConfig)
 	}
@@ -151,7 +151,7 @@ func (p *provider) getSecret(ctx context.Context, client *vaultclient.Client, se
 	return decodedVal, nil
 }
 
-// MountSecretsStoreObjectContent mounts content of the vault object to target path
+// MountSecretsStoreObjectContent mounts content of the openbao object to target path
 func (p *provider) HandleMountRequest(ctx context.Context, cfg config.Config, flagsConfig config.FlagsConfig) (*pb.MountResponse, error) {
 	hmacKey, err := p.hmacGenerator.GetOrCreateHMACKey(ctx)
 	if err != nil {

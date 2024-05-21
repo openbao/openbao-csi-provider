@@ -1,0 +1,22 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openbao-bootstrap
+  namespace: {{ .Release.namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  bootstrap.sh: |-
+    {
+      bao status
+      while [[ $? -ne 2 ]]; do sleep 1 && bao status; done
+    } > /dev/null
+    bao operator init --key-shares=1 --key-threshold=1 > /tmp/openbao_init
+    unseal=$(cat /tmp/openbao_init | grep "Unseal Key 1: " | sed -e "s/Unseal Key 1: //g")
+    root=$(cat /tmp/openbao_init | grep "Initial Root Token:" | sed -e "s/Initial Root Token: //g")
+    bao operator unseal ${unseal?} > /dev/null
+    bao login -no-print ${root?} > /dev/null
+    echo "Successfully bootstrapped openbao"

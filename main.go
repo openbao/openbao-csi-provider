@@ -15,11 +15,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/clientcache"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
-	"github.com/hashicorp/vault-csi-provider/internal/hmac"
-	providerserver "github.com/hashicorp/vault-csi-provider/internal/server"
-	"github.com/hashicorp/vault-csi-provider/internal/version"
+	"github.com/openbao/openbao-csi-provider/internal/clientcache"
+	"github.com/openbao/openbao-csi-provider/internal/config"
+	"github.com/openbao/openbao-csi-provider/internal/hmac"
+	providerserver "github.com/openbao/openbao-csi-provider/internal/server"
+	"github.com/openbao/openbao-csi-provider/internal/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 	corev1 "k8s.io/api/core/v1"
@@ -45,25 +45,25 @@ func main() {
 
 func realMain(logger hclog.Logger) error {
 	flags := config.FlagsConfig{}
-	flag.StringVar(&flags.Endpoint, "endpoint", "/tmp/vault.sock", "Path to socket on which to listen for driver gRPC calls.")
+	flag.StringVar(&flags.Endpoint, "endpoint", "/tmp/openbao.sock", "Path to socket on which to listen for driver gRPC calls.")
 	flag.BoolVar(&flags.Debug, "debug", false, "Sets log to debug level.")
 	flag.BoolVar(&flags.Version, "version", false, "Prints the version information.")
 	flag.StringVar(&flags.HealthAddr, "health-addr", ":8080", "Configure http listener for reporting health.")
 
-	flag.StringVar(&flags.HMACSecretName, "hmac-secret-name", "vault-csi-provider-hmac-key", "Configure the Kubernetes secret name that the provider creates to store an HMAC key for generating secret version hashes")
+	flag.StringVar(&flags.HMACSecretName, "hmac-secret-name", "openbao-csi-provider-hmac-key", "Configure the Kubernetes secret name that the provider creates to store an HMAC key for generating secret version hashes")
 
-	flag.IntVar(&flags.CacheSize, "cache-size", 1000, "Set the maximum number of Vault tokens that will be cached in-memory. One Vault token will be stored for each pod on the same node that mounts secrets.")
+	flag.IntVar(&flags.CacheSize, "cache-size", 1000, "Set the maximum number of Openbao tokens that will be cached in-memory. One Openbao token will be stored for each pod on the same node that mounts secrets.")
 
-	flag.StringVar(&flags.VaultAddr, "vault-addr", "", "Default address for connecting to Vault. Can also be specified via the VAULT_ADDR environment variable.")
-	flag.StringVar(&flags.VaultMount, "vault-mount", "kubernetes", "Default Vault mount path for authentication. Can refer to a Kubernetes or JWT auth mount.")
-	flag.StringVar(&flags.VaultNamespace, "vault-namespace", "", "Default Vault namespace for Vault requests. Can also be specified via the VAULT_NAMESPACE environment variable.")
+	flag.StringVar(&flags.OpenbaoAddr, "openbao-addr", "", "Default address for connecting to Openbao. Can also be specified via the OPENBAO_ADDR environment variable.")
+	flag.StringVar(&flags.OpenbaoMount, "openbao-mount", "kubernetes", "Default Openbao mount path for authentication. Can refer to a Kubernetes or JWT auth mount.")
+	flag.StringVar(&flags.OpenbaoNamespace, "openbao-namespace", "", "Default Openbao namespace for Openbao requests. Can also be specified via the OPENBAO_NAMESPACE environment variable.")
 
-	flag.StringVar(&flags.TLSCACertPath, "vault-tls-ca-cert", "", "Path on disk to a single PEM-encoded CA certificate to trust for Vault. Takes precendence over -vault-tls-ca-directory. Can also be specified via the VAULT_CACERT environment variable.")
-	flag.StringVar(&flags.TLSCADirectory, "vault-tls-ca-directory", "", "Path on disk to a directory of PEM-encoded CA certificates to trust for Vault. Can also be specified via the VAULT_CAPATH environment variable.")
-	flag.StringVar(&flags.TLSServerName, "vault-tls-server-name", "", "Name to use as the SNI host when connecting to Vault via TLS. Can also be specified via the VAULT_TLS_SERVER_NAME environment variable.")
-	flag.StringVar(&flags.TLSClientCert, "vault-tls-client-cert", "", "Path on disk to a PEM-encoded client certificate for mTLS communication with Vault. If set, also requires -vault-tls-client-key. Can also be specified via the VAULT_CLIENT_CERT environment variable.")
-	flag.StringVar(&flags.TLSClientKey, "vault-tls-client-key", "", "Path on disk to a PEM-encoded client key for mTLS communication with Vault. If set, also requires -vault-tls-client-cert. Can also be specified via the VAULT_CLIENT_KEY environment variable.")
-	flag.BoolVar(&flags.TLSSkipVerify, "vault-tls-skip-verify", false, "Disable verification of TLS certificates. Can also be specified via the VAULT_SKIP_VERIFY environment variable.")
+	flag.StringVar(&flags.TLSCACertPath, "openbao-tls-ca-cert", "", "Path on disk to a single PEM-encoded CA certificate to trust for Openbao. Takes precendence over -openbao-tls-ca-directory. Can also be specified via the OPENBAO_CACERT environment variable.")
+	flag.StringVar(&flags.TLSCADirectory, "openbao-tls-ca-directory", "", "Path on disk to a directory of PEM-encoded CA certificates to trust for Openbao. Can also be specified via the OPENBAO_CAPATH environment variable.")
+	flag.StringVar(&flags.TLSServerName, "openbao-tls-server-name", "", "Name to use as the SNI host when connecting to Openbao via TLS. Can also be specified via the OPENBAO_TLS_SERVER_NAME environment variable.")
+	flag.StringVar(&flags.TLSClientCert, "openbao-tls-client-cert", "", "Path on disk to a PEM-encoded client certificate for mTLS communication with Openbao. If set, also requires -openbao-tls-client-key. Can also be specified via the OPENBAO_CLIENT_CERT environment variable.")
+	flag.StringVar(&flags.TLSClientKey, "openbao-tls-client-key", "", "Path on disk to a PEM-encoded client key for mTLS communication with Openbao. If set, also requires -openbao-tls-client-cert. Can also be specified via the OPENBAO_CLIENT_KEY environment variable.")
+	flag.BoolVar(&flags.TLSSkipVerify, "openbao-tls-skip-verify", false, "Disable verification of TLS certificates. Can also be specified via the OPENBAO_SKIP_VERIFY environment variable.")
 	flag.Parse()
 
 	// set log level
@@ -131,7 +131,7 @@ func realMain(logger hclog.Logger) error {
 	}
 	hmacGenerator := hmac.NewHMACGenerator(clientset, hmacSecretSpec)
 
-	clientCache, err := clientcache.NewClientCache(serverLogger.Named("vaultclient"), flags.CacheSize)
+	clientCache, err := clientcache.NewClientCache(serverLogger.Named("openbaoclient"), flags.CacheSize)
 	if err != nil {
 		return fmt.Errorf("failed to initialize the cache: %w", err)
 	}

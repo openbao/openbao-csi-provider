@@ -1,5 +1,5 @@
 REGISTRY_NAME?=docker.io/hashicorp
-IMAGE_NAME=vault-csi-provider
+IMAGE_NAME=openbao-csi-provider
 VERSION?=0.0.0-dev
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
 IMAGE_TAG_LATEST=$(REGISTRY_NAME)/$(IMAGE_NAME):latest
@@ -11,20 +11,20 @@ ifdef SOURCE_DATE_EPOCH
 else
     BUILD_DATE ?= $(shell date $(DATE_FMT))
 endif
-PKG=github.com/hashicorp/vault-csi-provider/internal/version
+PKG=github.com/openbao/openbao-csi-provider/internal/version
 LDFLAGS?="-X '$(PKG).BuildVersion=$(VERSION)' \
 	-X '$(PKG).BuildDate=$(BUILD_DATE)' \
 	-X '$(PKG).GoVersion=$(shell go version)'"
 CSI_DRIVER_VERSION=1.3.2
-VAULT_HELM_VERSION=0.24.1
-VAULT_VERSION=1.13.3
+OPENBAO_HELM_VERSION=0.24.1
+OPENBAO_VERSION=1.13.3
 GOLANGCI_LINT_FORMAT?=colored-line-number
 
-VAULT_VERSION_ARGS=--set server.image.tag=$(VAULT_VERSION)
-ifdef VAULT_LICENSE
-	VAULT_VERSION_ARGS=--set server.image.repository=docker.mirror.hashicorp.services/hashicorp/vault-enterprise \
-		--set server.image.tag=$(VAULT_VERSION)-ent \
-		--set server.enterpriseLicense.secretName=vault-ent-license
+OPENBAO_VERSION_ARGS=--set server.image.tag=$(OPENBAO_VERSION)
+ifdef OPENBAO_LICENSE
+	OPENBAO_VERSION_ARGS=--set server.image.repository=docker.mirror.hashicorp.services/openbao/openbao-enterprise \
+		--set server.image.tag=$(OPENBAO_VERSION)-ent \
+		--set server.enterpriseLicense.secretName=openbao-ent-license
 endif
 
 .PHONY: default build test bootstrap fmt lint image e2e-image e2e-setup e2e-teardown e2e-test mod setup-kind promote-staging-manifest copyright
@@ -77,7 +77,7 @@ setup-kind:
 	kind create cluster
 
 e2e-setup:
-	kind load docker-image e2e/vault-csi-provider:latest
+	kind load docker-image e2e/openbao-csi-provider:latest
 	kubectl apply -f test/bats/configs/cluster-resources.yaml
 	helm install secrets-store-csi-driver secrets-store-csi-driver \
 		--repo https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts --version=$(CSI_DRIVER_VERSION) \
@@ -85,25 +85,25 @@ e2e-setup:
 		--namespace=csi \
 		--set linux.image.pullPolicy="IfNotPresent" \
 		--set syncSecret.enabled=true \
-		--set tokenRequests[0].audience="vault"
-	@if [ -n "$(VAULT_LICENSE)" ]; then\
-        kubectl create --namespace=csi secret generic vault-ent-license --from-literal="license=${VAULT_LICENSE}";\
+		--set tokenRequests[0].audience="openbao"
+	@if [ -n "$(OPENBAO_LICENSE)" ]; then\
+        kubectl create --namespace=csi secret generic openbao-ent-license --from-literal="license=${OPENBAO_LICENSE}";\
     fi
-	helm install vault-bootstrap test/bats/configs/vault \
+	helm install openbao-bootstrap test/bats/configs/openbao \
 		--namespace=csi
-	helm install vault vault \
-		--repo https://helm.releases.hashicorp.com --version=$(VAULT_HELM_VERSION) \
+	helm install openbao openbao \
+		--repo https://openbao.github.io/openbao --version=$(OPENBAO_HELM_VERSION) \
 		--wait --timeout=5m \
 		--namespace=csi \
-		--values=test/bats/configs/vault/vault.values.yaml \
-		$(VAULT_VERSION_ARGS)
-	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=vault
-	kubectl exec -i --namespace=csi vault-0 -- /bin/sh /mnt/bootstrap/bootstrap.sh
-	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=vault-csi-provider
+		--values=test/bats/configs/openbao/openbao.values.yaml \
+		$(OPENBAO_VERSION_ARGS)
+	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=openbao
+	kubectl exec -i --namespace=csi openbao-0 -- /bin/sh /mnt/bootstrap/bootstrap.sh
+	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=openbao-csi-provider
 
 e2e-teardown:
-	helm uninstall --namespace=csi vault || true
-	helm uninstall --namespace=csi vault-bootstrap || true
+	helm uninstall --namespace=csi openbao || true
+	helm uninstall --namespace=csi openbao-bootstrap || true
 	helm uninstall --namespace=csi secrets-store-csi-driver || true
 	kubectl delete --ignore-not-found -f test/bats/configs/cluster-resources.yaml
 

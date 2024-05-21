@@ -1,13 +1,18 @@
-# HashiCorp Vault Provider for Secrets Store CSI Driver
+# Openbao Provider for Secrets Store CSI Driver
 
-HashiCorp [Vault](https://vaultproject.io) provider for the [Secrets Store CSI driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver) allows you to get secrets stored in
-Vault and use the Secrets Store CSI driver interface to mount them into Kubernetes pods.
+> :warning: **Please note**: We take OpenBao's security and our users' trust very seriously. If
+you believe you have found a security issue in OpenBao Helm, _please responsibly disclose_
+by contacting us at [openbao-security@lists.lfedge.org](mailto:openbao-security@lists.lfedge.org).
+
+
+[Openbao](https://openbao.org) provider for the [Secrets Store CSI driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver) allows you to get secrets stored in
+Openbao and use the Secrets Store CSI driver interface to mount them into Kubernetes pods.
 
 ## Installation
 
 ### Prerequisites
 
-* Supported Kubernetes version, see the [documentation](https://developer.hashicorp.com/vault/docs/platform/k8s/csi#supported-kubernetes-versions) (runs on Linux nodes only)
+* Supported Kubernetes version, see the [documentation](https://openbao.org/docs/platform/k8s/csi#supported-kubernetes-versions) (runs on Linux nodes only)
 * [Secrets store CSI driver](https://secrets-store-csi-driver.sigs.k8s.io/getting-started/installation.html) installed
 
 ### Using helm
@@ -15,10 +20,10 @@ Vault and use the Secrets Store CSI driver interface to mount them into Kubernet
 The recommended installation method is via helm 3:
 
 ```bash
-helm repo add hashicorp https://helm.releases.hashicorp.com
-# Just installs Vault CSI provider. Adjust `server.enabled` and `injector.enabled`
-# if you also want helm to install Vault and the Vault Agent injector.
-helm install vault hashicorp/vault \
+helm repo add openbao https://openbao.github.io/openbao
+# Just installs Openbao CSI provider. Adjust `server.enabled` and `injector.enabled`
+# if you also want helm to install Openbao and the Openbao Agent injector.
+helm install openbao openbao/openbao \
   --set "server.enabled=false" \
   --set "injector.enabled=false" \
   --set "csi.enabled=true"
@@ -29,27 +34,27 @@ helm install vault hashicorp/vault \
 You can also install using the deployment config in the `deployment` folder:
 
 ```bash
-kubectl apply -f deployment/vault-csi-provider.yaml
+kubectl apply -f deployment/openbao-csi-provider.yaml
 ```
 
 ## Usage
 
-See the [learn tutorial](https://learn.hashicorp.com/tutorials/vault/kubernetes-secret-store-driver)
-and [documentation pages](https://www.vaultproject.io/docs/platform/k8s/csi) for
-full details of deploying, configuring and using Vault CSI provider. The
+See the [learn tutorial](https://openbao.org/tutorials/openbao/kubernetes-secret-store-driver)
+and [documentation pages](https://openbao.org/docs/platform/k8s/csi) for
+full details of deploying, configuring and using Openbao CSI provider. The
 integration tests in [test/bats/provider.bats](./test/bats/provider.bats) also
 provide a good set of fully worked and tested examples to build on.
 
 ## Troubleshooting
 
-To troubleshoot issues with Vault CSI provider, look at logs from the Vault CSI
+To troubleshoot issues with Openbao CSI provider, look at logs from the Openbao CSI
 provider pod running on the same node as your application pod:
 
   ```bash
   kubectl get pods -o wide
-  # find the Vault CSI provider pod running on the same node as your application pod
+  # find the Openbao CSI provider pod running on the same node as your application pod
 
-  kubectl logs vault-csi-provider-7x44t
+  kubectl logs openbao-csi-provider-7x44t
   ```
 
 Pass `-debug=true` to the provider to get more detailed logs. When installing

@@ -13,9 +13,9 @@ import (
 	"sync"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/auth"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao-csi-provider/internal/auth"
+	"github.com/openbao/openbao-csi-provider/internal/config"
+	"github.com/openbao/openbao/api"
 )
 
 type Client struct {
@@ -25,7 +25,7 @@ type Client struct {
 	mtx sync.Mutex
 }
 
-// New creates a Vault client configured for a specific SecretProviderClass (SPC).
+// New creates a Openbao client configured for a specific SecretProviderClass (SPC).
 // Config is read from environment variables first, then flags, then the SPC in
 // ascending order of precedence.
 func New(logger hclog.Logger, spcParameters config.Parameters, flagsConfig config.FlagsConfig) (*Client, error) {
@@ -33,10 +33,10 @@ func New(logger hclog.Logger, spcParameters config.Parameters, flagsConfig confi
 	if cfg.Error != nil {
 		return nil, cfg.Error
 	}
-	if err := overlayConfig(cfg, flagsConfig.VaultAddr, flagsConfig.TLSConfig()); err != nil {
+	if err := overlayConfig(cfg, flagsConfig.OpenbaoAddr, flagsConfig.TLSConfig()); err != nil {
 		return nil, err
 	}
-	if err := overlayConfig(cfg, spcParameters.VaultAddress, spcParameters.VaultTLSConfig); err != nil {
+	if err := overlayConfig(cfg, spcParameters.OpenbaoAddress, spcParameters.OpenbaoTLSConfig); err != nil {
 		return nil, err
 	}
 
@@ -45,12 +45,12 @@ func New(logger hclog.Logger, spcParameters config.Parameters, flagsConfig confi
 		return nil, err
 	}
 
-	// Set Vault namespace if configured.
-	if flagsConfig.VaultNamespace != "" {
-		inner.SetNamespace(flagsConfig.VaultNamespace)
+	// Set Openbao namespace if configured.
+	if flagsConfig.OpenbaoNamespace != "" {
+		inner.SetNamespace(flagsConfig.OpenbaoNamespace)
 	}
-	if spcParameters.VaultNamespace != "" {
-		inner.SetNamespace(spcParameters.VaultNamespace)
+	if spcParameters.OpenbaoNamespace != "" {
+		inner.SetNamespace(spcParameters.OpenbaoNamespace)
 	}
 
 	return &Client{
@@ -59,25 +59,25 @@ func New(logger hclog.Logger, spcParameters config.Parameters, flagsConfig confi
 	}, nil
 }
 
-func overlayConfig(cfg *api.Config, vaultAddr string, tlsConfig api.TLSConfig) error {
+func overlayConfig(cfg *api.Config, openbaoAddr string, tlsConfig api.TLSConfig) error {
 	err := cfg.ConfigureTLS(&tlsConfig)
 	if err != nil {
 		return err
 	}
-	if vaultAddr != "" {
-		cfg.Address = vaultAddr
+	if openbaoAddr != "" {
+		cfg.Address = openbaoAddr
 	}
 
 	return nil
 }
 
-// RequestSecret fetches a single secret response from Vault. It will trigger
-// an initial authentication attempt if the client doesn't already have a Vault
-// token. Otherwise, if it gets a 403 response from Vault it will attempt
+// RequestSecret fetches a single secret response from Openbao. It will trigger
+// an initial authentication attempt if the client doesn't already have a Openbao
+// token. Otherwise, if it gets a 403 response from Openbao it will attempt
 // to reauthenticate and retry fetching the secret, on the assumption that
 // the pre-existing token may have expired.
 //
-// We follow this pattern because we assume Vault Agent is caching and renewing
+// We follow this pattern because we assume Openbao Agent is caching and renewing
 // our auth token, and we have no universal way to check it's still valid and
 // in the Agent's cache before making a request.
 func (c *Client) RequestSecret(ctx context.Context, authMethod *auth.KubernetesJWTAuth, secretConfig config.Secret) (*api.Secret, error) {
@@ -120,11 +120,11 @@ func (c *Client) RequestSecret(ctx context.Context, authMethod *auth.KubernetesJ
 	return api.ParseSecret(resp.Body)
 }
 
-// auth handles authenticating to Vault and setting the client's token.
+// auth handles authenticating to Openbao and setting the client's token.
 // All requests from one client share the same token. This function serializes
 // authentications so that when a token expires, multiple consumers asking it
 // to reauthenticate at the same time only trigger one new authentication with
-// Vault.
+// Openbao.
 func (c *Client) auth(ctx context.Context, authMethod *auth.KubernetesJWTAuth, failedToken string) (authed bool, err error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
@@ -135,7 +135,7 @@ func (c *Client) auth(ctx context.Context, authMethod *auth.KubernetesJWTAuth, f
 		return false, nil
 	}
 
-	c.logger.Debug("performing vault login")
+	c.logger.Debug("performing openbao login")
 	path, body, err := authMethod.AuthRequest(ctx)
 	if err != nil {
 		return false, err
@@ -155,7 +155,7 @@ func (c *Client) auth(ctx context.Context, authMethod *auth.KubernetesJWTAuth, f
 		return false, fmt.Errorf("failed to parse login response: %w", err)
 	}
 
-	c.logger.Debug("vault login successful")
+	c.logger.Debug("openbao login successful")
 	c.inner.SetToken(secret.Auth.ClientToken)
 
 	return true, nil

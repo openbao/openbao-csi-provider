@@ -13,11 +13,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/auth"
-	"github.com/hashicorp/vault-csi-provider/internal/clientcache"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
-	"github.com/hashicorp/vault-csi-provider/internal/hmac"
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao-csi-provider/internal/auth"
+	"github.com/openbao/openbao-csi-provider/internal/clientcache"
+	"github.com/openbao/openbao-csi-provider/internal/config"
+	"github.com/openbao/openbao-csi-provider/internal/hmac"
+	"github.com/openbao/openbao/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -158,7 +158,7 @@ func TestHandleMountRequest(t *testing.T) {
 		TargetPath:     "some/unused/path",
 		FilePermission: 0,
 		Parameters: config.Parameters{
-			VaultRoleName: "my-vault-role",
+			OpenbaoRoleName: "my-openbao-role",
 			Secrets: []config.Secret{
 				{
 					ObjectName: "object-one",
@@ -210,7 +210,7 @@ func TestHandleMountRequest(t *testing.T) {
 	versionsSeen := map[string]struct{}{}
 
 	// SETUP
-	mockVaultServer := httptest.NewServer(http.HandlerFunc(mockVaultHandler(
+	mockOpenbaoServer := httptest.NewServer(http.HandlerFunc(mockOpenbaoHandler(
 		map[string]func(numberOfCalls int) (string, interface{}){
 			"/v1/path/one": func(numberOfCalls int) (string, interface{}) {
 				return "the-key", fmt.Sprintf("secret v%d from: /v1/path/one", numberOfCalls)
@@ -224,9 +224,9 @@ func TestHandleMountRequest(t *testing.T) {
 		},
 	)))
 	flagsConfig := config.FlagsConfig{
-		VaultAddr: mockVaultServer.URL,
+		OpenbaoAddr: mockOpenbaoServer.URL,
 	}
-	defer mockVaultServer.Close()
+	defer mockOpenbaoServer.Close()
 
 	k8sClient := fake.NewSimpleClientset(
 		&corev1.ServiceAccount{},
@@ -250,7 +250,7 @@ func TestHandleMountRequest(t *testing.T) {
 		versionsSeen[resp.ObjectVersion[i].Version] = struct{}{}
 	}
 
-	// The mockVaultHandler function below includes a dynamic counter in the content of secrets.
+	// The mockOpenbaoHandler function below includes a dynamic counter in the content of secrets.
 	// That means mounting again with a fresh provider will update the contents of the secrets, which should update the version.
 	resp, err := NewProvider(hclog.Default(), authMethod, hmacGenerator, clientCache).HandleMountRequest(context.Background(), spcConfig, flagsConfig)
 	require.NoError(t, err)
@@ -269,7 +269,7 @@ func TestHandleMountRequest(t *testing.T) {
 	}
 }
 
-func mockVaultHandler(pathMapping map[string]func(numberOfCalls int) (string, interface{})) func(w http.ResponseWriter, req *http.Request) {
+func mockOpenbaoHandler(pathMapping map[string]func(numberOfCalls int) (string, interface{})) func(w http.ResponseWriter, req *http.Request) {
 	getsPerPath := map[string]int{}
 
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -278,7 +278,7 @@ func mockVaultHandler(pathMapping map[string]func(numberOfCalls int) (string, in
 			// Assume all POSTs are login requests and return a token.
 			body, err := json.Marshal(&api.Secret{
 				Auth: &api.SecretAuth{
-					ClientToken: "my-vault-client-token",
+					ClientToken: "my-openbao-client-token",
 				},
 			})
 			if err != nil {

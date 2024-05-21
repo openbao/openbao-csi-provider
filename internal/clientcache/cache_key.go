@@ -6,7 +6,7 @@ package clientcache
 import (
 	"encoding/json"
 
-	"github.com/hashicorp/vault-csi-provider/internal/config"
+	"github.com/openbao/openbao-csi-provider/internal/config"
 )
 
 type cacheKey string
