@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, workflow_dispatch]
+on: [push, workflow_dispatch, pull_request]
 
 env:
   KIND_VERSION: "v0.19.0"
