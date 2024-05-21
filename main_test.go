@@ -18,7 +18,7 @@ func TestListen(t *testing.T) {
 	logger := hclog.NewNullLogger()
 	dir, err := ioutil.TempDir("/tmp", "TestListen")
 	require.NoError(t, err)
-	endpoint := path.Join(dir, "vault.sock")
+	endpoint := path.Join(dir, "openbao.sock")
 	defer func() {
 		require.NoError(t, os.Remove(endpoint))
 	}()

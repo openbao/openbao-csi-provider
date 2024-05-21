@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
+	"github.com/openbao/openbao-csi-provider/internal/config"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -35,7 +35,7 @@ func NewKubernetesJWTAuth(logger hclog.Logger, k8sClient kubernetes.Interface, p
 }
 
 // AuthRequest returns the request path and body required to authenticate
-// using the configured auth role in Vault. If no appropriate JWT is provided
+// using the configured auth role in Openbao. If no appropriate JWT is provided
 // in the CSI mount request, it will create a new one.
 func (k *KubernetesJWTAuth) AuthRequest(ctx context.Context) (path string, body map[string]string, err error) {
 	jwt := k.params.PodInfo.ServiceAccountToken
@@ -50,14 +50,14 @@ func (k *KubernetesJWTAuth) AuthRequest(ctx context.Context) (path string, body 
 		k.logger.Debug("using token from mount request for login")
 	}
 
-	mountPath := k.params.VaultAuthMountPath
+	mountPath := k.params.OpenbaoAuthMountPath
 	if mountPath == "" {
 		mountPath = k.defaultMountPath
 	}
 
 	return fmt.Sprintf("/v1/auth/%s/login", mountPath), map[string]string{
 		"jwt":  jwt,
-		"role": k.params.VaultRoleName,
+		"role": k.params.OpenbaoRoleName,
 	}, nil
 }
 

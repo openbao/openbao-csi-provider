@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao-csi-provider/internal/config"
+	"github.com/openbao/openbao/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -41,9 +41,9 @@ func TestCacheKeyedOnCorrectFields(t *testing.T) {
 	cache, err := NewClientCache(hclog.Default(), 10)
 	require.NoError(t, err)
 	params := config.Parameters{
-		VaultRoleName: "example-role",
-		VaultAddress:  "http://vault:8200",
-		VaultTLSConfig: api.TLSConfig{
+		OpenbaoRoleName: "example-role",
+		OpenbaoAddress:  "http://openbao:8200",
+		OpenbaoTLSConfig: api.TLSConfig{
 			Insecure: true,
 		},
 		Secrets: []config.Secret{

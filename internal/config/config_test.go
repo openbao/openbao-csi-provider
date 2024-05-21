@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao/api"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
@@ -20,9 +20,9 @@ const (
 	certsSPCYaml = `apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
-  name: vault-foo
+  name: openbao-foo
 spec:
-  provider: vault
+  provider: openbao
   parameters:
     objects: |
       - objectName: "test-certs"
@@ -90,9 +90,9 @@ func TestParseParameters(t *testing.T) {
 	actual, err := parseParameters(string(parametersStr))
 	require.NoError(t, err)
 	expected := Parameters{
-		VaultRoleName: "example-role",
-		VaultAddress:  "http://vault:8200",
-		VaultTLSConfig: api.TLSConfig{
+		OpenbaoRoleName: "example-role",
+		OpenbaoAddress:  "http://openbao:8200",
+		OpenbaoTLSConfig: api.TLSConfig{
 			Insecure: true,
 		},
 		Secrets: []Secret{
@@ -124,7 +124,7 @@ func TestParseConfig(t *testing.T) {
 			targetPath: targetPath,
 			parameters: map[string]string{
 				"roleName":           "example-role",
-				"vaultSkipTLSVerify": "true",
+				"openbaoSkipTLSVerify": "true",
 				"objects":            objects,
 			},
 			expected: Config{
@@ -132,8 +132,8 @@ func TestParseConfig(t *testing.T) {
 				FilePermission: 420,
 				Parameters: func() Parameters {
 					expected := Parameters{}
-					expected.VaultRoleName = roleName
-					expected.VaultTLSConfig.Insecure = true
+					expected.OpenbaoRoleName = roleName
+					expected.OpenbaoTLSConfig.Insecure = true
 					expected.Secrets = []Secret{
 						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
 					}
@@ -146,15 +146,15 @@ func TestParseConfig(t *testing.T) {
 			targetPath: targetPath,
 			parameters: map[string]string{
 				"roleName":                                 "example-role",
-				"vaultSkipTLSVerify":                       "true",
-				"vaultAddress":                             "my-vault-address",
-				"vaultNamespace":                           "my-vault-namespace",
-				"vaultKubernetesMountPath":                 "my-mount-path",
-				"vaultCACertPath":                          "my-ca-cert-path",
-				"vaultCADirectory":                         "my-ca-directory",
-				"vaultTLSServerName":                       "mytls-server-name",
-				"vaultTLSClientCertPath":                   "my-tls-client-cert-path",
-				"vaultTLSClientKeyPath":                    "my-tls-client-key-path",
+				"openbaoSkipTLSVerify":                       "true",
+				"openbaoAddress":                             "my-openbao-address",
+				"openbaoNamespace":                           "my-openbao-namespace",
+				"openbaoKubernetesMountPath":                 "my-mount-path",
+				"openbaoCACertPath":                          "my-ca-cert-path",
+				"openbaoCADirectory":                         "my-ca-directory",
+				"openbaoTLSServerName":                       "mytls-server-name",
+				"openbaoTLSClientCertPath":                   "my-tls-client-cert-path",
+				"openbaoTLSClientKeyPath":                    "my-tls-client-key-path",
 				"csi.storage.k8s.io/pod.name":              "my-pod-name",
 				"csi.storage.k8s.io/pod.uid":               "my-pod-uid",
 				"csi.storage.k8s.io/pod.namespace":         "my-pod-namespace",
@@ -167,14 +167,14 @@ func TestParseConfig(t *testing.T) {
 				TargetPath:     targetPath,
 				FilePermission: 420,
 				Parameters: Parameters{
-					VaultRoleName:      roleName,
-					VaultAddress:       "my-vault-address",
-					VaultNamespace:     "my-vault-namespace",
-					VaultAuthMountPath: "my-mount-path",
+					OpenbaoRoleName:      roleName,
+					OpenbaoAddress:       "my-openbao-address",
+					OpenbaoNamespace:     "my-openbao-namespace",
+					OpenbaoAuthMountPath: "my-mount-path",
 					Secrets: []Secret{
 						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
 					},
-					VaultTLSConfig: api.TLSConfig{
+					OpenbaoTLSConfig: api.TLSConfig{
 						CACert:        "my-ca-cert-path",
 						CAPath:        "my-ca-directory",
 						ClientCert:    "my-tls-client-cert-path",
@@ -210,23 +210,23 @@ func TestParseConfig_Errors(t *testing.T) {
 	}{
 		"no roleName": {
 			parameters: map[string]string{
-				"vaultSkipTLSVerify": "true",
+				"openbaoSkipTLSVerify": "true",
 				"objects":            objects,
 			},
 		},
 		"no secrets configured": {
 			parameters: map[string]string{
 				"roleName":           "example-role",
-				"vaultSkipTLSVerify": "true",
+				"openbaoSkipTLSVerify": "true",
 				"objects":            "",
 			},
 		},
-		"both vaultAuthMountPath and vaultKubernetesMountPath specified": {
+		"both openbaoAuthMountPath and openbaoKubernetesMountPath specified": {
 			parameters: map[string]string{
 				"roleName":                 "example-role",
-				"vaultSkipTLSVerify":       "true",
-				"vaultAuthMountPath":       "foo",
-				"vaultKubernetesMountPath": "bar",
+				"openbaoSkipTLSVerify":       "true",
+				"openbaoAuthMountPath":       "foo",
+				"openbaoKubernetesMountPath": "bar",
 				"objects":                  objects,
 			},
 		},
@@ -244,8 +244,8 @@ func TestValidateConfig(t *testing.T) {
 	minimumValid := Config{
 		TargetPath: "a",
 		Parameters: Parameters{
-			VaultAddress:  "http://127.0.0.1:8200",
-			VaultRoleName: "b",
+			OpenbaoAddress:  "http://127.0.0.1:8200",
+			OpenbaoRoleName: "b",
 			Secrets:       []Secret{{}},
 		},
 	}
@@ -263,7 +263,7 @@ func TestValidateConfig(t *testing.T) {
 			name: "No role name",
 			cfg: func() Config {
 				cfg := minimumValid
-				cfg.Parameters.VaultRoleName = ""
+				cfg.Parameters.OpenbaoRoleName = ""
 				return cfg
 			}(),
 		},

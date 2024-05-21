@@ -25,16 +25,16 @@ setup_postgres() {
     kubectl --namespace=test apply -f $CONFIGS/postgres.yaml
     kubectl wait --namespace=test --for=condition=Ready --timeout=10m pod -l app=postgres
 
-    # Configure vault to manage postgres
-    kubectl --namespace=csi exec vault-0 -- vault secrets enable database
-    kubectl --namespace=csi exec vault-0 -- vault write database/config/postgres \
+    # Configure openbao to manage postgres
+    kubectl --namespace=csi exec openbao-0 -- bao secrets enable database
+    kubectl --namespace=csi exec openbao-0 -- bao write database/config/postgres \
         plugin_name="postgresql-database-plugin" \
         allowed_roles="*" \
         connection_url="postgres://{{username}}:{{password}}@postgres.test.svc.cluster.local:5432/db?sslmode=disable" \
         username="root" \
         password="${POSTGRES_PASSWORD}" \
         verify_connection=false
-    cat $CONFIGS/postgres-creation-statements.sql | kubectl --namespace=csi exec -i vault-0 -- vault write database/roles/test-role \
+    cat $CONFIGS/postgres-creation-statements.sql | kubectl --namespace=csi exec -i openbao-0 -- bao write database/roles/test-role \
         db_name="postgres" \
         default_ttl="1h" max_ttl="24h" \
         creation_statements=-

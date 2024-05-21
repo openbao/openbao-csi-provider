@@ -8,32 +8,32 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	lru "github.com/hashicorp/golang-lru/v2"
-	vaultclient "github.com/hashicorp/vault-csi-provider/internal/client"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
+	openbaoclient "github.com/openbao/openbao-csi-provider/internal/client"
+	"github.com/openbao/openbao-csi-provider/internal/config"
 )
 
 type ClientCache struct {
 	logger hclog.Logger
 
 	mtx   sync.Mutex
-	cache *lru.Cache[cacheKey, *vaultclient.Client]
+	cache *lru.Cache[cacheKey, *openbaoclient.Client]
 }
 
 // NewClientCache intializes a new client cache. The cache's lifetime
 // should be tied to the provider process (i.e. longer than a single
-// mount request) so that Vault tokens stored in the clients are cached
+// mount request) so that Openbao tokens stored in the clients are cached
 // and reused across different mount requests for the same pod.
 func NewClientCache(logger hclog.Logger, size int) (*ClientCache, error) {
-	var cache *lru.Cache[cacheKey, *vaultclient.Client]
+	var cache *lru.Cache[cacheKey, *openbaoclient.Client]
 	var err error
 	if size > 0 {
-		logger.Info("Creating Vault client cache", "size", size)
-		cache, err = lru.New[cacheKey, *vaultclient.Client](size)
+		logger.Info("Creating Openbao client cache", "size", size)
+		cache, err = lru.New[cacheKey, *openbaoclient.Client](size)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		logger.Info("Disabling Vault client cache", "size", size)
+		logger.Info("Disabling Openbao client cache", "size", size)
 	}
 
 	return &ClientCache{
@@ -42,9 +42,9 @@ func NewClientCache(logger hclog.Logger, size int) (*ClientCache, error) {
 	}, nil
 }
 
-func (c *ClientCache) GetOrCreateClient(params config.Parameters, flagsConfig config.FlagsConfig) (*vaultclient.Client, error) {
+func (c *ClientCache) GetOrCreateClient(params config.Parameters, flagsConfig config.FlagsConfig) (*openbaoclient.Client, error) {
 	if c.cache == nil {
-		return vaultclient.New(c.logger, params, flagsConfig)
+		return openbaoclient.New(c.logger, params, flagsConfig)
 	}
 
 	key, err := makeCacheKey(params)
@@ -59,7 +59,7 @@ func (c *ClientCache) GetOrCreateClient(params config.Parameters, flagsConfig co
 		return cachedClient, nil
 	}
 
-	client, err := vaultclient.New(c.logger, params, flagsConfig)
+	client, err := openbaoclient.New(c.logger, params, flagsConfig)
 	if err != nil {
 		return nil, err
 	}

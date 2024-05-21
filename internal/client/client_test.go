@@ -23,9 +23,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/vault-csi-provider/internal/auth"
-	"github.com/hashicorp/vault-csi-provider/internal/config"
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao-csi-provider/internal/auth"
+	"github.com/openbao/openbao-csi-provider/internal/config"
+	"github.com/openbao/openbao/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
@@ -62,32 +62,32 @@ func TestNew(t *testing.T) {
 		},
 	} {
 		_, err = New(hclog.NewNullLogger(), config.Parameters{
-			VaultTLSConfig: tc.cfg,
+			OpenbaoTLSConfig: tc.cfg,
 		}, config.FlagsConfig{})
 		require.NoError(t, err, tc.name)
 	}
 }
 
 func TestConfigPrecedence(t *testing.T) {
-	if originalVaultAddr, isSet := os.LookupEnv(api.EnvVaultAddress); isSet {
-		defer os.Setenv(api.EnvVaultAddress, originalVaultAddr)
+	if originalOpenbaoAddr, isSet := os.LookupEnv(api.EnvOpenbaoAddress); isSet {
+		defer os.Setenv(api.EnvOpenbaoAddress, originalOpenbaoAddr)
 	}
-	t.Setenv(api.EnvVaultAddress, "from-env")
+	t.Setenv(api.EnvOpenbaoAddress, "from-env")
 
 	client, err := New(hclog.NewNullLogger(), config.Parameters{}, config.FlagsConfig{})
 	require.NoError(t, err)
 	assert.Equal(t, "from-env", client.inner.Address())
 
 	client, err = New(hclog.NewNullLogger(), config.Parameters{}, config.FlagsConfig{
-		VaultAddr: "from-flags",
+		OpenbaoAddr: "from-flags",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "from-flags", client.inner.Address())
 
 	client, err = New(hclog.NewNullLogger(), config.Parameters{
-		VaultAddress: "from-parameters",
+		OpenbaoAddress: "from-parameters",
 	}, config.FlagsConfig{
-		VaultAddr: "from-flags",
+		OpenbaoAddr: "from-flags",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "from-parameters", client.inner.Address())
@@ -99,7 +99,7 @@ func TestNew_Error(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = New(hclog.NewNullLogger(), config.Parameters{
-		VaultTLSConfig: api.TLSConfig{
+		OpenbaoTLSConfig: api.TLSConfig{
 			CAPath: dir,
 		},
 	}, config.FlagsConfig{})
@@ -108,11 +108,11 @@ func TestNew_Error(t *testing.T) {
 
 func TestRequestSecret_OnlyAuthenticatesOnce(t *testing.T) {
 	var auths, reads int
-	mockVaultServer := httptest.NewServer(http.HandlerFunc(mockVaultHandler(t, &auths, &reads)))
+	mockOpenbaoServer := httptest.NewServer(http.HandlerFunc(mockOpenbaoHandler(t, &auths, &reads)))
 	flagsConfig := config.FlagsConfig{
-		VaultAddr: mockVaultServer.URL,
+		OpenbaoAddr: mockOpenbaoServer.URL,
 	}
-	defer mockVaultServer.Close()
+	defer mockOpenbaoServer.Close()
 
 	k8sClient := fake.NewSimpleClientset(
 		&corev1.ServiceAccount{},
@@ -143,7 +143,7 @@ func TestRequestSecret_OnlyAuthenticatesOnce(t *testing.T) {
 	}
 }
 
-func mockVaultHandler(t *testing.T, auths, reads *int) func(w http.ResponseWriter, req *http.Request) {
+func mockOpenbaoHandler(t *testing.T, auths, reads *int) func(w http.ResponseWriter, req *http.Request) {
 	t.Helper()
 
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -154,7 +154,7 @@ func mockVaultHandler(t *testing.T, auths, reads *int) func(w http.ResponseWrite
 			// Assume all POSTs are login requests and return a token.
 			body, err := json.Marshal(&api.Secret{
 				Auth: &api.SecretAuth{
-					ClientToken: fmt.Sprintf("my-vault-client-token-%d", *auths),
+					ClientToken: fmt.Sprintf("my-openbao-client-token-%d", *auths),
 				},
 			})
 			require.NoError(t, err)

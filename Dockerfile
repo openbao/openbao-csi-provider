@@ -14,13 +14,13 @@ ENV CGO_ENABLED=0
 # Leave the GOPATH
 WORKDIR /build
 COPY . ./
-RUN go build -o vault-csi-provider
+RUN go build -o openbao-csi-provider
 
 # dev runs the binary from devbuild
 # -----------------------------------
 FROM docker.mirror.hashicorp.services/alpine:${ALPINE_VERSION} AS dev
-COPY --from=devbuild /build/vault-csi-provider /bin/
-ENTRYPOINT [ "/bin/vault-csi-provider" ]
+COPY --from=devbuild /build/openbao-csi-provider /bin/
+ENTRYPOINT [ "/bin/openbao-csi-provider" ]
 
 # Default release image.
 # -----------------------------------
@@ -28,17 +28,17 @@ FROM docker.mirror.hashicorp.services/alpine:${ALPINE_VERSION} AS default
 
 ARG PRODUCT_VERSION
 ARG PRODUCT_REVISION
-ARG PRODUCT_NAME=vault-csi-provider
+ARG PRODUCT_NAME=openbao-csi-provider
 ARG TARGETOS TARGETARCH
 
 LABEL version=$PRODUCT_VERSION
 LABEL revision=$PRODUCT_REVISION
 
-COPY dist/$TARGETOS/$TARGETARCH/vault-csi-provider /bin/
-ENTRYPOINT [ "/bin/vault-csi-provider" ]
+COPY dist/$TARGETOS/$TARGETARCH/openbao-csi-provider /bin/
+ENTRYPOINT [ "/bin/openbao-csi-provider" ]
 
 # ===================================
-# 
+#
 #   Set default target to 'dev'.
 #
 # ===================================

@@ -1,4 +1,4 @@
-module github.com/hashicorp/vault-csi-provider/tools
+module github.com/openbao/openbao-csi-provider/tools
 
 go 1.19
 

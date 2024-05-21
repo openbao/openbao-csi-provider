@@ -1,7 +1,0 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
-apiVersion: v3
-name: vault-test
-version: 0-test
-description: Testing chart to deploy self-signed TLS certificates and a bootstrap script for Vault.

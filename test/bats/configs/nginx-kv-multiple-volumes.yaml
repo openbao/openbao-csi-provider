@@ -43,10 +43,10 @@ spec:
         driver: secrets-store.csi.k8s.io
         readOnly: true
         volumeAttributes:
-          secretProviderClass: "vault-kv-sync-1"
+          secretProviderClass: "openbao-kv-sync-1"
     - name: secrets-store-2
       csi:
         driver: secrets-store.csi.k8s.io
         readOnly: true
         volumeAttributes:
-          secretProviderClass: "vault-kv-sync-2"
+          secretProviderClass: "openbao-kv-sync-2"

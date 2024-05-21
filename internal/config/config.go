@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/vault/api"
+	"github.com/openbao/openbao/api"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -37,9 +37,9 @@ type FlagsConfig struct {
 
 	CacheSize int
 
-	VaultAddr      string
-	VaultMount     string
-	VaultNamespace string
+	OpenbaoAddr      string
+	OpenbaoMount     string
+	OpenbaoNamespace string
 
 	TLSCACertPath  string
 	TLSCADirectory string
@@ -70,11 +70,11 @@ func (fc FlagsConfig) TLSConfig() api.TLSConfig {
 //
 // So we just deserialise by hand to avoid complexity and two passes.
 type Parameters struct {
-	VaultAddress       string
-	VaultRoleName      string
-	VaultAuthMountPath string
-	VaultNamespace     string
-	VaultTLSConfig     api.TLSConfig
+	OpenbaoAddress       string
+	OpenbaoRoleName      string
+	OpenbaoAuthMountPath string
+	OpenbaoNamespace     string
+	OpenbaoTLSConfig     api.TLSConfig
 	Secrets            []Secret
 	PodInfo            PodInfo
 	Audience           string
@@ -128,33 +128,33 @@ func parseParameters(parametersStr string) (Parameters, error) {
 	}
 
 	var parameters Parameters
-	parameters.VaultRoleName = params["roleName"]
-	parameters.VaultAddress = params["vaultAddress"]
-	parameters.VaultNamespace = params["vaultNamespace"]
-	parameters.VaultTLSConfig.CACert = params["vaultCACertPath"]
-	parameters.VaultTLSConfig.CAPath = params["vaultCADirectory"]
-	parameters.VaultTLSConfig.TLSServerName = params["vaultTLSServerName"]
-	parameters.VaultTLSConfig.ClientCert = params["vaultTLSClientCertPath"]
-	parameters.VaultTLSConfig.ClientKey = params["vaultTLSClientKeyPath"]
-	k8sMountPath, k8sSet := params["vaultKubernetesMountPath"]
-	authMountPath, authSet := params["vaultAuthMountPath"]
+	parameters.OpenbaoRoleName = params["roleName"]
+	parameters.OpenbaoAddress = params["openbaoAddress"]
+	parameters.OpenbaoNamespace = params["openbaoNamespace"]
+	parameters.OpenbaoTLSConfig.CACert = params["openbaoCACertPath"]
+	parameters.OpenbaoTLSConfig.CAPath = params["openbaoCADirectory"]
+	parameters.OpenbaoTLSConfig.TLSServerName = params["openbaoTLSServerName"]
+	parameters.OpenbaoTLSConfig.ClientCert = params["openbaoTLSClientCertPath"]
+	parameters.OpenbaoTLSConfig.ClientKey = params["openbaoTLSClientKeyPath"]
+	k8sMountPath, k8sSet := params["openbaoKubernetesMountPath"]
+	authMountPath, authSet := params["openbaoAuthMountPath"]
 	switch {
 	case k8sSet && authSet:
-		return Parameters{}, fmt.Errorf("cannot set both vaultKubernetesMountPath and vaultAuthMountPath")
+		return Parameters{}, fmt.Errorf("cannot set both openbaoKubernetesMountPath and openbaoAuthMountPath")
 	case k8sSet:
-		parameters.VaultAuthMountPath = k8sMountPath
+		parameters.OpenbaoAuthMountPath = k8sMountPath
 	case authSet:
-		parameters.VaultAuthMountPath = authMountPath
+		parameters.OpenbaoAuthMountPath = authMountPath
 	}
 	parameters.PodInfo.Name = params["csi.storage.k8s.io/pod.name"]
 	parameters.PodInfo.UID = types.UID(params["csi.storage.k8s.io/pod.uid"])
 	parameters.PodInfo.Namespace = params["csi.storage.k8s.io/pod.namespace"]
 	parameters.PodInfo.ServiceAccountName = params["csi.storage.k8s.io/serviceAccount.name"]
 	parameters.Audience = params["audience"]
-	if skipTLS, ok := params["vaultSkipTLSVerify"]; ok {
+	if skipTLS, ok := params["openbaoSkipTLSVerify"]; ok {
 		value, err := strconv.ParseBool(skipTLS)
 		if err == nil {
-			parameters.VaultTLSConfig.Insecure = value
+			parameters.OpenbaoTLSConfig.Insecure = value
 		} else {
 			return Parameters{}, err
 		}
@@ -180,7 +180,7 @@ func parseParameters(parametersStr string) (Parameters, error) {
 			return Parameters{}, fmt.Errorf("failed to unmarshal service account tokens: %w", err)
 		}
 
-		audience := "vault"
+		audience := "openbao"
 		if parameters.Audience != "" {
 			audience = parameters.Audience
 		}
@@ -197,7 +197,7 @@ func (c *Config) validate() error {
 	if c.TargetPath == "" {
 		return errors.New("missing target path field")
 	}
-	if c.Parameters.VaultRoleName == "" {
+	if c.Parameters.OpenbaoRoleName == "" {
 		return errors.New("missing 'roleName' in SecretProviderClass definition")
 	}
 	if len(c.Parameters.Secrets) == 0 {

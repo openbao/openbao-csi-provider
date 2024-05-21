@@ -27,4 +27,4 @@ spec:
         driver: secrets-store.csi.k8s.io
         readOnly: true
         volumeAttributes:
-          secretProviderClass: "vault-{{ .Values.engine }}"
+          secretProviderClass: "openbao-{{ .Values.engine }}"
