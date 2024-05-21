@@ -17,7 +17,7 @@ LDFLAGS?="-X '$(PKG).BuildVersion=$(VERSION)' \
 	-X '$(PKG).GoVersion=$(shell go version)'"
 CSI_DRIVER_VERSION=1.3.2
 OPENBAO_HELM_VERSION=0.3.0
-OPENBAO_VERSION=1.13.3
+OPENBAO_VERSION=v2.0.0-alpha20240329
 GOLANGCI_LINT_FORMAT?=colored-line-number
 
 OPENBAO_VERSION_ARGS=--set server.image.tag=$(OPENBAO_VERSION)
