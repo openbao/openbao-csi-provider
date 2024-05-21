@@ -10,7 +10,7 @@ on:
         required: false
 
 env:
-  PKG_NAME: "vault-csi-provider"
+  PKG_NAME: "openbao-csi-provider"
 
 jobs:
   get-product-version:
