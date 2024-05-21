@@ -16,7 +16,7 @@ LDFLAGS?="-X '$(PKG).BuildVersion=$(VERSION)' \
 	-X '$(PKG).BuildDate=$(BUILD_DATE)' \
 	-X '$(PKG).GoVersion=$(shell go version)'"
 CSI_DRIVER_VERSION=1.3.2
-OPENBAO_HELM_VERSION=0.24.1
+OPENBAO_HELM_VERSION=0.3.0
 OPENBAO_VERSION=1.13.3
 GOLANGCI_LINT_FORMAT?=colored-line-number
 
