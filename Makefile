@@ -92,7 +92,7 @@ e2e-setup:
 	helm install openbao-bootstrap test/bats/configs/openbao \
 		--namespace=csi
 	helm install openbao openbao \
-		--repo https://openbao.github.io/openbao --version=$(OPENBAO_HELM_VERSION) \
+		--repo https://openbao.github.io/openbao-helm --version=$(OPENBAO_HELM_VERSION) \
 		--wait --timeout=5m \
 		--namespace=csi \
 		--values=test/bats/configs/openbao/openbao.values.yaml \

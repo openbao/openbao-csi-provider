@@ -20,7 +20,7 @@ Openbao and use the Secrets Store CSI driver interface to mount them into Kubern
 The recommended installation method is via helm 3:
 
 ```bash
-helm repo add openbao https://openbao.github.io/openbao
+helm repo add openbao https://openbao.github.io/openbao-helm
 # Just installs Openbao CSI provider. Adjust `server.enabled` and `injector.enabled`
 # if you also want helm to install Openbao and the Openbao Agent injector.
 helm install openbao openbao/openbao \
