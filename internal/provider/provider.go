@@ -26,7 +26,7 @@ import (
 // provider implements the secrets-store-csi-driver provider interface
 // and communicates with the Openbao API.
 type provider struct {
-	logger             hclog.Logger
+	logger               hclog.Logger
 	openbaoResponseCache map[openbaoResponseCacheKey]*api.Secret
 
 	// Allows mocking Kubernetes API for tests.
@@ -37,7 +37,7 @@ type provider struct {
 
 func NewProvider(logger hclog.Logger, authMethod *auth.KubernetesJWTAuth, hmacGenerator *hmacgen.HMACGenerator, clientCache *clientcache.ClientCache) *provider {
 	p := &provider{
-		logger:             logger,
+		logger:               logger,
 		openbaoResponseCache: make(map[openbaoResponseCacheKey]*api.Secret),
 
 		authMethod:    authMethod,
