@@ -75,9 +75,9 @@ type Parameters struct {
 	OpenbaoAuthMountPath string
 	OpenbaoNamespace     string
 	OpenbaoTLSConfig     api.TLSConfig
-	Secrets            []Secret
-	PodInfo            PodInfo
-	Audience           string
+	Secrets              []Secret
+	PodInfo              PodInfo
+	Audience             string
 }
 
 type PodInfo struct {

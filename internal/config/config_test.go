@@ -123,9 +123,9 @@ func TestParseConfig(t *testing.T) {
 			name:       "defaults",
 			targetPath: targetPath,
 			parameters: map[string]string{
-				"roleName":           "example-role",
+				"roleName":             "example-role",
 				"openbaoSkipTLSVerify": "true",
-				"objects":            objects,
+				"objects":              objects,
 			},
 			expected: Config{
 				TargetPath:     targetPath,
@@ -146,22 +146,22 @@ func TestParseConfig(t *testing.T) {
 			targetPath: targetPath,
 			parameters: map[string]string{
 				"roleName":                                 "example-role",
-				"openbaoSkipTLSVerify":                       "true",
-				"openbaoAddress":                             "my-openbao-address",
-				"openbaoNamespace":                           "my-openbao-namespace",
-				"openbaoKubernetesMountPath":                 "my-mount-path",
-				"openbaoCACertPath":                          "my-ca-cert-path",
-				"openbaoCADirectory":                         "my-ca-directory",
-				"openbaoTLSServerName":                       "mytls-server-name",
-				"openbaoTLSClientCertPath":                   "my-tls-client-cert-path",
-				"openbaoTLSClientKeyPath":                    "my-tls-client-key-path",
+				"openbaoSkipTLSVerify":                     "true",
+				"openbaoAddress":                           "my-openbao-address",
+				"openbaoNamespace":                         "my-openbao-namespace",
+				"openbaoKubernetesMountPath":               "my-mount-path",
+				"openbaoCACertPath":                        "my-ca-cert-path",
+				"openbaoCADirectory":                       "my-ca-directory",
+				"openbaoTLSServerName":                     "mytls-server-name",
+				"openbaoTLSClientCertPath":                 "my-tls-client-cert-path",
+				"openbaoTLSClientKeyPath":                  "my-tls-client-key-path",
 				"csi.storage.k8s.io/pod.name":              "my-pod-name",
 				"csi.storage.k8s.io/pod.uid":               "my-pod-uid",
 				"csi.storage.k8s.io/pod.namespace":         "my-pod-namespace",
 				"csi.storage.k8s.io/serviceAccount.name":   "my-pod-sa-name",
 				"csi.storage.k8s.io/serviceAccount.tokens": `{"my-aud": {"token": "my-pod-sa-token", "expirationTimestamp": "bar"}, "other-aud": {"token": "unused-token"}}`,
-				"objects":                                  objects,
-				"audience":                                 "my-aud",
+				"objects":  objects,
+				"audience": "my-aud",
 			},
 			expected: Config{
 				TargetPath:     targetPath,
@@ -211,23 +211,23 @@ func TestParseConfig_Errors(t *testing.T) {
 		"no roleName": {
 			parameters: map[string]string{
 				"openbaoSkipTLSVerify": "true",
-				"objects":            objects,
+				"objects":              objects,
 			},
 		},
 		"no secrets configured": {
 			parameters: map[string]string{
-				"roleName":           "example-role",
+				"roleName":             "example-role",
 				"openbaoSkipTLSVerify": "true",
-				"objects":            "",
+				"objects":              "",
 			},
 		},
 		"both openbaoAuthMountPath and openbaoKubernetesMountPath specified": {
 			parameters: map[string]string{
-				"roleName":                 "example-role",
+				"roleName":                   "example-role",
 				"openbaoSkipTLSVerify":       "true",
 				"openbaoAuthMountPath":       "foo",
 				"openbaoKubernetesMountPath": "bar",
-				"objects":                  objects,
+				"objects":                    objects,
 			},
 		},
 	} {
@@ -246,7 +246,7 @@ func TestValidateConfig(t *testing.T) {
 		Parameters: Parameters{
 			OpenbaoAddress:  "http://127.0.0.1:8200",
 			OpenbaoRoleName: "b",
-			Secrets:       []Secret{{}},
+			Secrets:         []Secret{{}},
 		},
 	}
 	for _, tc := range []struct {
