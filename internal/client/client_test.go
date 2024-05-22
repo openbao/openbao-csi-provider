@@ -69,10 +69,10 @@ func TestNew(t *testing.T) {
 }
 
 func TestConfigPrecedence(t *testing.T) {
-	if originalOpenbaoAddr, isSet := os.LookupEnv(api.EnvOpenbaoAddress); isSet {
-		defer os.Setenv(api.EnvOpenbaoAddress, originalOpenbaoAddr)
+	if originalOpenbaoAddr, isSet := os.LookupEnv(api.EnvVaultAddress); isSet {
+		defer os.Setenv(api.EnvVaultAddress, originalOpenbaoAddr)
 	}
-	t.Setenv(api.EnvOpenbaoAddress, "from-env")
+	t.Setenv(api.EnvVaultAddress, "from-env")
 
 	client, err := New(hclog.NewNullLogger(), config.Parameters{}, config.FlagsConfig{})
 	require.NoError(t, err)
