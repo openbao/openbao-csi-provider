@@ -1,4 +1,4 @@
-REGISTRY_NAME?=docker.io/hashicorp
+REGISTRY_NAME?=quay.io/openbao
 IMAGE_NAME=openbao-csi-provider
 VERSION?=0.0.0-dev
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
@@ -16,16 +16,11 @@ LDFLAGS?="-X '$(PKG).BuildVersion=$(VERSION)' \
 	-X '$(PKG).BuildDate=$(BUILD_DATE)' \
 	-X '$(PKG).GoVersion=$(shell go version)'"
 CSI_DRIVER_VERSION=1.3.2
-OPENBAO_HELM_VERSION=0.3.0
+OPENBAO_HELM_VERSION=0.4.0
 OPENBAO_VERSION=v2.0.0-alpha20240329
 GOLANGCI_LINT_FORMAT?=colored-line-number
 
 OPENBAO_VERSION_ARGS=--set server.image.tag=$(OPENBAO_VERSION)
-ifdef OPENBAO_LICENSE
-	OPENBAO_VERSION_ARGS=--set server.image.repository=docker.mirror.hashicorp.services/openbao/openbao-enterprise \
-		--set server.image.tag=$(OPENBAO_VERSION)-ent \
-		--set server.enterpriseLicense.secretName=openbao-ent-license
-endif
 
 .PHONY: default build test bootstrap fmt lint image e2e-image e2e-setup e2e-teardown e2e-test mod setup-kind promote-staging-manifest copyright
 
@@ -86,9 +81,6 @@ e2e-setup:
 		--set linux.image.pullPolicy="IfNotPresent" \
 		--set syncSecret.enabled=true \
 		--set tokenRequests[0].audience="openbao"
-	@if [ -n "$(OPENBAO_LICENSE)" ]; then\
-        kubectl create --namespace=csi secret generic openbao-ent-license --from-literal="license=${OPENBAO_LICENSE}";\
-    fi
 	helm install openbao-bootstrap test/bats/configs/openbao \
 		--namespace=csi
 	helm install openbao openbao \
