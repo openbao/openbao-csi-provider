@@ -1,8 +1,9 @@
 REGISTRY_NAME?=quay.io/openbao
 IMAGE_NAME=openbao-csi-provider
 VERSION?=0.0.0-dev
-IMAGE_TAG=$(IMAGE_NAME):$(VERSION)
-IMAGE_TAG_LATEST=$(REGISTRY_NAME)/$(IMAGE_NAME):latest
+IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
+# commented because it may not be in use
+# IMAGE_TAG_LATEST=$(REGISTRY_NAME)/$(IMAGE_NAME):latest
 # https://reproducible-builds.org/docs/source-date-epoch/
 DATE_FMT=+%Y-%m-%d-%H:%M
 SOURCE_DATE_EPOCH ?= $(shell git log -1 --pretty=%ct)
