@@ -89,7 +89,7 @@ e2e-setup:
 		--namespace=csi \
 		--values=test/bats/configs/openbao/openbao.values.yaml \
 		$(OPENBAO_VERSION_ARGS)
-	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=openbao
+	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=openbao || kubectl describe pods -l app.kubernetes.io/name=openbao
 	kubectl exec -i --namespace=csi openbao-0 -- /bin/sh /mnt/bootstrap/bootstrap.sh
 	kubectl wait --namespace=csi --for=condition=Ready --timeout=5m pod -l app.kubernetes.io/name=openbao-csi-provider
 
