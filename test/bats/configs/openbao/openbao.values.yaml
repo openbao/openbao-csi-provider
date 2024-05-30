@@ -9,8 +9,6 @@ injector:
   enabled: false
 
 server:
-  image:
-    repository: quay.io/openbao/openbao
   volumes:
   - name: openbao-server-tls
     secret:
