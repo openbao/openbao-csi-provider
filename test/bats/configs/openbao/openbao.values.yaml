@@ -10,7 +10,7 @@ injector:
 
 server:
   image:
-    repository: docker.mirror.hashicorp.services/openbao/openbao
+    repository: quay.io/openbao/openbao
   volumes:
   - name: openbao-server-tls
     secret:
