@@ -7,64 +7,52 @@ if [[ -n "${DISPLAY_SETUP_TEARDOWN_LOGS:-}" ]]; then
     export SETUP_TEARDOWN_OUTFILE=/dev/stdout
 fi
 
-#SKIP_TEARDOWN=true
-CONFIGS=test/bats/configs
+# SKIP_TEARDOWN=true
+export CONFIGS=test/bats/configs
 
-setup(){
-    { # Braces used to redirect all setup logs.
+setup() {
     # 1. Configure Openbao.
 
     # 1. a) Openbao policies
     cat $CONFIGS/openbao-policy-db.hcl | kubectl --namespace=csi exec -i openbao-0 -- bao policy write db-policy -
     cat $CONFIGS/openbao-policy-kv.hcl | kubectl --namespace=csi exec -i openbao-0 -- bao policy write kv-policy -
     cat $CONFIGS/openbao-policy-pki.hcl | kubectl --namespace=csi exec -i openbao-0 -- bao policy write pki-policy -
-    if [ -n "${OPENBAO_LICENSE}" ]; then
-        kubectl --namespace=csi exec openbao-0 -- bao namespace create acceptance
-        cat $CONFIGS/openbao-policy-kv-namespace.hcl | kubectl --namespace=csi exec -i openbao-0 -- bao policy write -namespace=acceptance kv-namespace-policy -
-    fi
     cat $CONFIGS/openbao-policy-kv-custom-audience.hcl | kubectl --namespace=csi exec -i openbao-0 -- bao policy write kv-custom-audience-policy -
 
     # 1. b) i) Setup kubernetes auth engine.
     kubectl --namespace=csi exec openbao-0 -- bao auth enable kubernetes
+
     kubectl --namespace=csi exec openbao-0 -- sh -c 'bao write auth/kubernetes/config \
         kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"'
-    if [ -n "${OPENBAO_LICENSE}" ]; then
-        kubectl --namespace=csi exec openbao-0 -- bao auth enable -namespace=acceptance kubernetes
-        kubectl --namespace=csi exec openbao-0 -- sh -c 'bao write -namespace=acceptance auth/kubernetes/config \
-            kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"'
-    fi
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/kubernetes/role/db-role \
         bound_service_account_names=nginx-db \
         bound_service_account_namespaces=test \
         audience=openbao \
         policies=db-policy \
         ttl=20m
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/kubernetes/role/kv-role \
         bound_service_account_names=nginx-kv \
         bound_service_account_namespaces=test \
         audience=openbao \
         policies=kv-policy \
         ttl=20m
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/kubernetes/role/kv-custom-audience-role \
         audience=custom-audience \
         bound_service_account_names=nginx-kv-custom-audience \
         bound_service_account_namespaces=test \
         policies=kv-custom-audience-policy \
         ttl=20m
-    if [ -n "${OPENBAO_LICENSE}" ]; then
-        kubectl --namespace=csi exec openbao-0 -- bao write -namespace=acceptance auth/kubernetes/role/kv-namespace-role \
-            bound_service_account_names=nginx-kv-namespace \
-            bound_service_account_namespaces=test \
-            audience=openbao \
-            policies=kv-namespace-policy \
-            ttl=20m
-    fi
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/kubernetes/role/pki-role \
         bound_service_account_names=nginx-pki \
         bound_service_account_namespaces=test \
         audience=openbao \
         policies=pki-policy \
         ttl=20m
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/kubernetes/role/all-role \
         bound_service_account_names=nginx-all \
         bound_service_account_namespaces=test \
@@ -74,9 +62,11 @@ setup(){
 
     # 1. b) ii) Setup JWT auth
     kubectl --namespace=csi exec openbao-0 -- bao auth enable jwt
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/jwt/config \
         oidc_discovery_url=https://kubernetes.default.svc.cluster.local \
         oidc_discovery_ca_pem=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
     kubectl --namespace=csi exec openbao-0 -- bao write auth/jwt/role/jwt-kv-role \
         role_type="jwt" \
         bound_audiences="openbao" \
@@ -102,10 +92,6 @@ setup(){
     kubectl --namespace=csi exec openbao-0 -- bao kv put secret/kv-sync1 bar1=hello-sync1
     kubectl --namespace=csi exec openbao-0 -- bao kv put secret/kv-sync2 bar2=hello-sync2
     kubectl --namespace=csi exec openbao-0 -- bao kv put secret/kv-sync3 bar3=aGVsbG8tc3luYzM=
-    if [ -n "${OPENBAO_LICENSE}" ]; then
-        kubectl --namespace=csi exec openbao-0 -- bao secrets enable -namespace=acceptance -path=secret -version=2 kv
-        kubectl --namespace=csi exec openbao-0 -- bao kv put -namespace=acceptance secret/kv1-namespace greeting=hello-namespaces
-    fi
     kubectl --namespace=csi exec openbao-0 -- bao kv put secret/kv-custom-audience bar=hello-custom-audience
 
     # 2. Create shared k8s resources.
@@ -119,10 +105,9 @@ setup(){
     kubectl --namespace=test apply -f $CONFIGS/openbao-kv-sync-secretproviderclass.yaml
     kubectl --namespace=test apply -f $CONFIGS/openbao-kv-sync-multiple-secretproviderclass.yaml
     kubectl --namespace=test apply -f $CONFIGS/openbao-pki-secretproviderclass.yaml
-    } > $SETUP_TEARDOWN_OUTFILE
 }
 
-teardown(){
+teardown() {
     if [[ -n $SKIP_TEARDOWN ]]; then
         echo "Skipping teardown"
         return
@@ -141,9 +126,6 @@ teardown(){
     fi
 
     # Teardown Openbao configuration.
-    if [ -n "${OPENBAO_LICENSE}" ]; then
-        kubectl --namespace=csi exec openbao-0 -- bao namespace delete acceptance
-    fi
     kubectl --namespace=csi exec openbao-0 -- bao auth disable kubernetes
     kubectl --namespace=csi exec openbao-0 -- bao auth disable jwt
     kubectl --namespace=csi exec openbao-0 -- bao secrets disable secret
@@ -167,6 +149,8 @@ teardown(){
     helm --namespace=test install nginx $CONFIGS/nginx \
         --set engine=kv --set sa=kv \
         --wait --timeout=5m
+
+    kubectl get pods -n test
 
     result=$(kubectl --namespace=test exec nginx-kv -- cat /mnt/secrets-store/secret-1)
     [[ "$result" == "hello1" ]]
@@ -338,19 +322,7 @@ teardown(){
     wait_for_success "kubectl --namespace=test describe pod nginx-kv | grep 'service account name not authorized'"
 }
 
-@test "9 Openbao Enterprise namespace" {
-    if [ -z "${OPENBAO_LICENSE}" ]; then
-        skip "No Openbao license configured, skipping namespace test"
-    fi
-    helm --namespace=test install nginx $CONFIGS/nginx \
-        --set engine=kv-namespace --set sa=kv-namespace \
-        --wait --timeout=5m
-
-    result=$(kubectl --namespace=test exec nginx-kv-namespace -- cat /mnt/secrets-store/secret-1)
-    [[ "$result" == "hello-namespaces" ]]
-}
-
-@test "10 Custom audience" {
+@test "9 Custom audience" {
     helm --namespace=test install nginx $CONFIGS/nginx \
         --set engine=kv-custom-audience --set sa=kv-custom-audience \
         --wait --timeout=5m
@@ -359,7 +331,7 @@ teardown(){
     [[ "$result" == "hello-custom-audience" ]]
 }
 
-@test "11 Consistent version hashes" {
+@test "10 Consistent version hashes" {
     helm --namespace=test install nginx $CONFIGS/nginx \
         --set engine=kv --set sa=kv \
         --wait --timeout=5m
@@ -402,7 +374,7 @@ teardown(){
     [[ "$versions2" != "$versions3" ]]
 }
 
-@test "12 JWT auth" {
+@test "11 JWT auth" {
     helm --namespace=test install nginx $CONFIGS/nginx \
         --set engine=kv-jwt-auth --set sa=kv \
         --wait --timeout=5m
