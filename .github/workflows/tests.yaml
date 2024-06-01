@@ -83,4 +83,5 @@ jobs:
         run: docker image load --input ${{ env.TARBALL_FILE }}
 
       - name: bats tests
+        timeout-minutes: 15
         run: DISPLAY_SETUP_TEARDOWN_LOGS=true make e2e-setup e2e-test e2e-teardown
