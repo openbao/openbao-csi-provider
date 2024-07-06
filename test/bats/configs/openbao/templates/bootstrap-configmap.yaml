@@ -11,12 +11,12 @@ metadata:
 data:
   bootstrap.sh: |-
     {
-      bao status
-      while [[ $? -ne 2 ]]; do sleep 1 && bao status; done
+      bao status -tls-skip-verify
+      while [[ $? -ne 2 ]]; do sleep 1 && bao status -tls-skip-verify; done
     } > /dev/null
-    bao operator init --key-shares=1 --key-threshold=1 > /tmp/openbao_init
+    bao operator init --key-shares=1 --key-threshold=1 -tls-skip-verify > /tmp/openbao_init
     unseal=$(cat /tmp/openbao_init | grep "Unseal Key 1: " | sed -e "s/Unseal Key 1: //g")
     root=$(cat /tmp/openbao_init | grep "Initial Root Token:" | sed -e "s/Initial Root Token: //g")
-    bao operator unseal ${unseal?} > /dev/null
-    bao login -no-print ${root?} > /dev/null
+    bao operator unseal -tls-skip-verify ${unseal?} > /dev/null
+    bao login -no-print -tls-skip-verify ${root?} > /dev/null
     echo "Successfully bootstrapped openbao"

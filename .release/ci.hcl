@@ -3,15 +3,11 @@
 
 schema = "1"
 
-project "vault-csi-provider" {
-  team = "vault"
-  slack {
-    // #vault-releases channel
-    notification_channel = "C03RXFX5M4L" // #feed-vault-releases
-  }
+project "openbao-csi-provider" {
+  team = "openbao"
   github {
-    organization = "hashicorp"
-    repository = "vault-csi-provider"
+    organization = "openbao"
+    repository = "openbao-csi-provider"
     release_branches = ["main"]
   }
 }
@@ -24,8 +20,8 @@ event "merge" {
 event "build" {
   depends = ["merge"]
   action "build" {
-    organization = "hashicorp"
-    repository = "vault-csi-provider"
+    organization = "openbao"
+    repository = "openbao-csi-provider"
     workflow = "build"
   }
 }
@@ -33,7 +29,7 @@ event "build" {
 event "upload-dev" {
   depends = ["build"]
   action "upload-dev" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "upload-dev"
     depends = ["build"]
@@ -47,7 +43,7 @@ event "upload-dev" {
 event "security-scan-binaries" {
   depends = ["upload-dev"]
   action "security-scan-binaries" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "security-scan-binaries"
     config = "security-scan.hcl"
@@ -61,7 +57,7 @@ event "security-scan-binaries" {
 event "security-scan-containers" {
   depends = ["security-scan-binaries"]
   action "security-scan-containers" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "security-scan-containers"
     config = "security-scan.hcl"
@@ -75,7 +71,7 @@ event "security-scan-containers" {
 event "sign" {
   depends = ["security-scan-containers"]
   action "sign" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "sign"
   }
@@ -88,7 +84,7 @@ event "sign" {
 event "verify" {
   depends = ["sign"]
   action "verify" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "verify"
   }
@@ -109,7 +105,7 @@ event "trigger-staging" {
 event "promote-staging" {
   depends = ["trigger-staging"]
   action "promote-staging" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "promote-staging"
     config = "release-metadata.hcl"
@@ -123,7 +119,7 @@ event "promote-staging" {
 event "promote-staging-docker" {
   depends = ["promote-staging"]
   action "promote-staging-docker" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "promote-staging-docker"
   }
@@ -141,7 +137,7 @@ event "trigger-production" {
 event "promote-production" {
   depends = ["trigger-production"]
   action "promote-production" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "promote-production"
   }
@@ -154,7 +150,7 @@ event "promote-production" {
 event "promote-production-docker" {
   depends = ["promote-production"]
   action "promote-production-docker" {
-    organization = "hashicorp"
+    organization = "openbao"
     repository = "crt-workflows-common"
     workflow = "promote-production-docker"
   }
