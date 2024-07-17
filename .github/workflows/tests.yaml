@@ -5,12 +5,10 @@ on: [push, workflow_dispatch, pull_request]
 env:
   KIND_VERSION: "v0.23.0"
   BATS_VERSION: "1.11.0"
-  NODE_VERSION: "19.9.0"
+  NODE_VERSION: "22.0.0"
   TARBALL_FILE: openbao-csi-provider.docker.tar
 
 jobs:
-  copyright:
-    uses: hashicorp/vault-workflows-common/.github/workflows/copyright-headers.yaml@main
   go-checks:
     uses: hashicorp/vault-workflows-common/.github/workflows/go-checks.yaml@main
   lint:
