@@ -2,7 +2,7 @@
 
 > :warning: **Please note**: We take OpenBao's security and our users' trust very seriously. If
 you believe you have found a security issue in OpenBao Helm, _please responsibly disclose_
-by contacting us at [openbao-security@lists.lfedge.org](mailto:openbao-security@lists.lfedge.org).
+by contacting us at [openbao-security@lists.openssf.org](mailto:openbao-security@lists.openssf.org).
 
 
 [Openbao](https://openbao.org) provider for the [Secrets Store CSI driver](https://github.com/kubernetes-sigs/secrets-store-csi-driver) allows you to get secrets stored in
