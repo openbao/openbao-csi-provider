@@ -41,7 +41,7 @@ jobs:
       - name: Test
         run: make test
 
-      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: openbao-csi-provider-image
           path: ${{ env.TARBALL_FILE }}
@@ -73,7 +73,7 @@ jobs:
           node_image: kindest/node:v${{ matrix.kind-k8s-version }}
           version: ${{ env.KIND_VERSION }}
 
-      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: openbao-csi-provider-image
 
