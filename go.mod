@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-hclog v1.5.0
 	github.com/hashicorp/golang-lru/v2 v2.0.2
 	github.com/openbao/openbao/api v1.9.3-0.20240330013750-f20d4684d48c
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.54.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
