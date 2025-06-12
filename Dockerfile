@@ -4,12 +4,12 @@
 # This Dockerfile contains multiple targets.
 # Use 'docker build --target=<name> .' to build one.
 
-ARG ALPINE_VERSION=3.18.2
+ARG ALPINE_VERSION=3.22.0
 ARG GO_VERSION=latest
 
 # devbuild compiles the binary
 # -----------------------------------
-FROM docker.mirror.hashicorp.services/golang:${GO_VERSION} AS devbuild
+FROM mirror.gcr.io/golang:${GO_VERSION} AS devbuild
 ENV CGO_ENABLED=0
 # Leave the GOPATH
 WORKDIR /build
@@ -18,7 +18,7 @@ RUN go build -o openbao-csi-provider
 
 # dev runs the binary from devbuild
 # -----------------------------------
-FROM docker.mirror.hashicorp.services/alpine:${ALPINE_VERSION} AS dev
+FROM mirror.gcr.io/alpine:${ALPINE_VERSION} AS dev
 COPY --from=devbuild /build/openbao-csi-provider /bin/
 ENTRYPOINT [ "/bin/openbao-csi-provider" ]
 
