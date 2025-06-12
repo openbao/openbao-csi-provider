@@ -1,6 +1,6 @@
 module github.com/openbao/openbao-csi-provider
 
-go 1.20
+go 1.24
 
 require (
 	github.com/hashicorp/go-hclog v1.5.0
