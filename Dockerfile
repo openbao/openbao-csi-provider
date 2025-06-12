@@ -9,7 +9,7 @@ ARG GO_VERSION=latest
 
 # devbuild compiles the binary
 # -----------------------------------
-FROM mirror.gcr.io/golang:${GO_VERSION} AS devbuild
+FROM golang:${GO_VERSION} AS devbuild
 ENV CGO_ENABLED=0
 # Leave the GOPATH
 WORKDIR /build
@@ -18,7 +18,7 @@ RUN go build -o openbao-csi-provider
 
 # dev runs the binary from devbuild
 # -----------------------------------
-FROM mirror.gcr.io/alpine:${ALPINE_VERSION} AS dev
+FROM alpine:${ALPINE_VERSION} AS dev
 COPY --from=devbuild /build/openbao-csi-provider /bin/
 ENTRYPOINT [ "/bin/openbao-csi-provider" ]
 
