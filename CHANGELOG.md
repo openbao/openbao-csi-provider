@@ -2,9 +2,10 @@
 
 CHANGES:
 
-* Build with Go v1.20.5
-* Test with K8s 1.23-1.27
-* Updated Docker base image from alpine 3.17.3 -> 3.18.2
+* Build with Go v1.24.3
+* Test with K8s 1.31-1.33
+* Updated Docker base image from alpine 3.17.3 -> 3.22.0
+* Removing usage of docker.mirror.hashicorp.services
 
 # 1.4.0 (April 28th, 2023)
 

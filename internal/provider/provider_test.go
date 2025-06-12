@@ -22,7 +22,6 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	"sigs.k8s.io/secrets-store-csi-driver/provider/v1alpha1"
 	pb "sigs.k8s.io/secrets-store-csi-driver/provider/v1alpha1"
 )
 
@@ -241,7 +240,7 @@ func TestHandleMountRequest(t *testing.T) {
 		resp, err := provider.HandleMountRequest(context.Background(), spcConfig, flagsConfig)
 		require.NoError(t, err)
 
-		assert.Equal(t, (*v1alpha1.Error)(nil), resp.Error)
+		assert.Equal(t, (*pb.Error)(nil), resp.Error)
 		assert.Equal(t, expectedFiles, resp.Files)
 		assert.Equal(t, expectedVersionIDs[i], resp.ObjectVersion[i].Id)
 		assert.NotEmpty(t, resp.ObjectVersion[i].Version)
@@ -255,7 +254,7 @@ func TestHandleMountRequest(t *testing.T) {
 	resp, err := NewProvider(hclog.Default(), authMethod, hmacGenerator, clientCache).HandleMountRequest(context.Background(), spcConfig, flagsConfig)
 	require.NoError(t, err)
 
-	assert.Equal(t, (*v1alpha1.Error)(nil), resp.Error)
+	assert.Equal(t, (*pb.Error)(nil), resp.Error)
 	expectedFiles[0].Contents = []byte("secret v2 from: /v1/path/one")
 	expectedFiles[1].Contents = []byte(`{"request_id":"","lease_id":"","lease_duration":0,"renewable":false,"data":{"the-key":"secret v2 from: /v1/path/two"},"warnings":null}`)
 	expectedFiles[2].Contents = []byte("secret v2 from: /v1/path/three")

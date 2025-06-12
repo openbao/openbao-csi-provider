@@ -70,7 +70,15 @@ func TestNew(t *testing.T) {
 
 func TestConfigPrecedence(t *testing.T) {
 	if originalOpenbaoAddr, isSet := os.LookupEnv(api.EnvVaultAddress); isSet {
-		defer os.Setenv(api.EnvVaultAddress, originalOpenbaoAddr)
+		err := os.Setenv(api.EnvVaultAddress, originalOpenbaoAddr)
+		if err != nil {
+			t.Fatalf("Failed to set environment variable: %v", err)
+		}
+		defer func() {
+			if err := os.Setenv(api.EnvVaultAddress, ""); err != nil {
+				t.Errorf("Failed to reset environment variable: %v", err)
+			}
+		}()
 	}
 	t.Setenv(api.EnvVaultAddress, "from-env")
 

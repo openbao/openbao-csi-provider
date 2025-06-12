@@ -162,6 +162,7 @@ func (c *Client) auth(ctx context.Context, authMethod *auth.KubernetesJWTAuth, f
 }
 
 func (c *Client) doInternal(ctx context.Context, req *api.Request) (*api.Response, error) {
+	//nolint:staticcheck // SA1019: Using deprecated method until a better alternative is available
 	resp, err := c.inner.RawRequestWithContext(ctx, req)
 	if err != nil {
 		return nil, err

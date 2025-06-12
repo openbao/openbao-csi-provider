@@ -16,10 +16,9 @@ PKG=github.com/openbao/openbao-csi-provider/internal/version
 LDFLAGS?="-X '$(PKG).BuildVersion=$(VERSION)' \
 	-X '$(PKG).BuildDate=$(BUILD_DATE)' \
 	-X '$(PKG).GoVersion=$(shell go version)'"
-CSI_DRIVER_VERSION=1.3.2
-OPENBAO_HELM_VERSION=0.4.0
-OPENBAO_VERSION=2.0.0-alpha20240329
-GOLANGCI_LINT_FORMAT?=colored-line-number
+CSI_DRIVER_VERSION=1.5.1
+OPENBAO_HELM_VERSION=0.13.2
+OPENBAO_VERSION=2.2.2
 
 OPENBAO_VERSION_ARGS=--set server.image.tag=$(OPENBAO_VERSION)
 
@@ -38,16 +37,7 @@ fmt:
 	gofumpt -l -w .
 
 lint:
-	golangci-lint run \
-		--disable-all \
-		--timeout=10m \
-		--out-format=$(GOLANGCI_LINT_FORMAT) \
-		--enable=gofmt \
-		--enable=gosimple \
-		--enable=govet \
-		--enable=errcheck \
-		--enable=ineffassign \
-		--enable=unused
+	golangci-lint run
 
 build:
 	CGO_ENABLED=0 go build \
