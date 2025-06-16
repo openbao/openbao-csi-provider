@@ -3,7 +3,7 @@ module github.com/openbao/openbao-csi-provider
 go 1.24
 
 require (
-	github.com/hashicorp/go-hclog v1.5.0
+	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/openbao/openbao/api v1.9.3-0.20240330013750-f20d4684d48c
 	github.com/stretchr/testify v1.10.0
