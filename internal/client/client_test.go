@@ -25,7 +25,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/openbao/openbao-csi-provider/internal/auth"
 	"github.com/openbao/openbao-csi-provider/internal/config"
-	"github.com/openbao/openbao/api"
+	"github.com/openbao/openbao/api/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
