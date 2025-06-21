@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	pb "sigs.k8s.io/secrets-store-csi-driver/provider/v1alpha1"
 )
 
@@ -131,7 +131,7 @@ func realMain(logger hclog.Logger) error {
 			Namespace: string(namespace),
 			// TODO: Configurable labels and annotations?
 		},
-		Immutable: pointer.Bool(true),
+		Immutable: ptr.To(true),
 	}
 	hmacGenerator := hmac.NewHMACGenerator(clientset, hmacSecretSpec)
 
