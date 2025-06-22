@@ -19,7 +19,7 @@ import (
 	"github.com/openbao/openbao-csi-provider/internal/clientcache"
 	"github.com/openbao/openbao-csi-provider/internal/config"
 	hmacgen "github.com/openbao/openbao-csi-provider/internal/hmac"
-	"github.com/openbao/openbao/api"
+	"github.com/openbao/openbao/api/v2"
 	pb "sigs.k8s.io/secrets-store-csi-driver/provider/v1alpha1"
 )
 
