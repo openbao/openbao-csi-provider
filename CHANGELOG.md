@@ -1,6 +1,6 @@
 ## 1.5.0 (June 23rd, 2025)
 
-**First OpenBao Release!**
+**First Release after being forked for OpenBao**
 
 CHANGES:
 
