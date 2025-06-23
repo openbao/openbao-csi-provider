@@ -34,7 +34,7 @@ ARG TARGETOS TARGETARCH
 LABEL version=$PRODUCT_VERSION
 LABEL revision=$PRODUCT_REVISION
 
-COPY dist/$TARGETOS/$TARGETARCH/openbao-csi-provider /bin/
+COPY $BIN_NAME /bin/
 ENTRYPOINT [ "/bin/openbao-csi-provider" ]
 
 # ===================================
