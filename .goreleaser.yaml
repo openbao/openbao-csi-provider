@@ -56,7 +56,6 @@ dockers:
       - "docker.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/openbao-csi-provider:{{ .Version }}-amd64"
     extra_files:
       - ./LICENSE
-      - ./.release/docker/docker-entrypoint.sh
       - ./CHANGELOG.md
   - id: alpine-arm
     use: buildx
@@ -92,7 +91,6 @@ dockers:
       - "docker.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/openbao-csi-provider:{{ .Version }}-arm"
     extra_files:
       - ./LICENSE
-      - ./.release/docker/docker-entrypoint.sh
       - ./CHANGELOG.md
   - id: alpine-arm64
     use: buildx
@@ -128,7 +126,6 @@ dockers:
       - "docker.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/openbao-csi-provider:{{ .Version }}-arm64"
     extra_files:
       - ./LICENSE
-      - ./.release/docker/docker-entrypoint.sh
       - ./CHANGELOG.md
 
 docker_manifests:
