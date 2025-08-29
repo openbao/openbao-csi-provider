@@ -1,3 +1,10 @@
+## Unreleased
+
+CHANGES:
+
+- Introduced backwards compatibility for parameter prefixes in the CSI configuration. The prefixes "bao", "openbao", and "vault" are now accepted to retain compatibility with previous configurations.
+- Updated SecretProviderClass configurations to use `provider: openbao` instead of `provider: vault` across various YAML files:
+
 ## 1.5.0 (June 23rd, 2025)
 
 **First Release after being forked for OpenBao**
