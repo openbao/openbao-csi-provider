@@ -269,6 +269,113 @@ func TestParseConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:       "check precedence of new parameters over old - when all three have the same value",
+			targetPath: targetPath,
+			parameters: map[string]string{
+				"roleName":       "example-role",
+				"vaultAddress":   "my-openbao-address",
+				"baoAddress":     "my-openbao-address",
+				"openbaoAddress": "my-openbao-address",
+				"objects":        objects,
+			},
+			expected: Config{
+				TargetPath:     targetPath,
+				FilePermission: 420,
+				Parameters: Parameters{
+					OpenbaoAddress:  "my-openbao-address",
+					OpenbaoRoleName: "example-role",
+					Secrets: []Secret{
+						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
+					},
+				},
+			},
+		},
+		{
+			name:       "check precedence of new parameters over old - bao before all",
+			targetPath: targetPath,
+			parameters: map[string]string{
+				"roleName":       "example-role",
+				"vaultAddress":   "my-wrong-address",
+				"baoAddress":     "my-openbao-address",
+				"openbaoAddress": "my-also-wrong-address",
+				"objects":        objects,
+			},
+			expected: Config{
+				TargetPath:     targetPath,
+				FilePermission: 420,
+				Parameters: Parameters{
+					OpenbaoAddress:  "my-openbao-address",
+					OpenbaoRoleName: "example-role",
+					Secrets: []Secret{
+						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
+					},
+				},
+			},
+		},
+		{
+			name:       "check precedence of new parameters over old - bao > vault",
+			targetPath: targetPath,
+			parameters: map[string]string{
+				"roleName":     "example-role",
+				"vaultAddress": "my-wrong-address",
+				"baoAddress":   "my-openbao-address",
+				"objects":      objects,
+			},
+			expected: Config{
+				TargetPath:     targetPath,
+				FilePermission: 420,
+				Parameters: Parameters{
+					OpenbaoAddress:  "my-openbao-address",
+					OpenbaoRoleName: "example-role",
+					Secrets: []Secret{
+						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
+					},
+				},
+			},
+		},
+		{
+			name:       "check precedence of new parameters over old - bao > openbao",
+			targetPath: targetPath,
+			parameters: map[string]string{
+				"roleName":       "example-role",
+				"openbaoAddress": "my-openbao-address",
+				"baoAddress":     "my-openbao-address",
+				"objects":        objects,
+			},
+			expected: Config{
+				TargetPath:     targetPath,
+				FilePermission: 420,
+				Parameters: Parameters{
+					OpenbaoAddress:  "my-openbao-address",
+					OpenbaoRoleName: "example-role",
+					Secrets: []Secret{
+						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
+					},
+				},
+			},
+		},
+		{
+			name:       "check precedence of new parameters over old - openbao > vault",
+			targetPath: targetPath,
+			parameters: map[string]string{
+				"roleName":       "example-role",
+				"openbaoAddress": "my-openbao-address",
+				"vaultAddress":   "my-wrong-address",
+				"objects":        objects,
+			},
+			expected: Config{
+				TargetPath:     targetPath,
+				FilePermission: 420,
+				Parameters: Parameters{
+					OpenbaoAddress:  "my-openbao-address",
+					OpenbaoRoleName: "example-role",
+					Secrets: []Secret{
+						{"bar1", "v1/secret/foo1", "", "", nil, 0o600, ""},
+					},
+				},
+			},
+		},
 	} {
 		parametersStr, err := json.Marshal(tc.parameters)
 		require.NoError(t, err)
