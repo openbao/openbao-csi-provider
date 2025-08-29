@@ -98,6 +98,19 @@ type Secret struct {
 	Encoding       string                 `yaml:"encoding,omitempty"`
 }
 
+func parseParametersPrefix(params map[string]string, suffix string) (string, bool) {
+	// accepted prefixes of the Openbao parameters
+	// can be either "bao", "openbao" or "vault" to retain backward compatibility
+	prefixes := []string{"bao", "openbao", "vault"}
+	for _, prefix := range prefixes {
+		key := prefix + suffix
+		if val, ok := params[key]; ok {
+			return val, ok
+		}
+	}
+	return "", false
+}
+
 func Parse(parametersStr, targetPath, permissionStr string) (Config, error) {
 	config := Config{
 		TargetPath: targetPath,
@@ -128,16 +141,20 @@ func parseParameters(parametersStr string) (Parameters, error) {
 	}
 
 	var parameters Parameters
-	parameters.OpenbaoRoleName = params["roleName"]
-	parameters.OpenbaoAddress = params["openbaoAddress"]
-	parameters.OpenbaoNamespace = params["openbaoNamespace"]
-	parameters.OpenbaoTLSConfig.CACert = params["openbaoCACertPath"]
-	parameters.OpenbaoTLSConfig.CAPath = params["openbaoCADirectory"]
-	parameters.OpenbaoTLSConfig.TLSServerName = params["openbaoTLSServerName"]
-	parameters.OpenbaoTLSConfig.ClientCert = params["openbaoTLSClientCertPath"]
-	parameters.OpenbaoTLSConfig.ClientKey = params["openbaoTLSClientKeyPath"]
-	k8sMountPath, k8sSet := params["openbaoKubernetesMountPath"]
-	authMountPath, authSet := params["openbaoAuthMountPath"]
+	if roleName, ok := parseParametersPrefix(params, "RoleName"); ok {
+		parameters.OpenbaoRoleName = roleName
+	} else {
+		parameters.OpenbaoRoleName = params["roleName"]
+	}
+	parameters.OpenbaoAddress, _ = parseParametersPrefix(params, "Address")
+	parameters.OpenbaoNamespace, _ = parseParametersPrefix(params, "Namespace")
+	parameters.OpenbaoTLSConfig.CACert, _ = parseParametersPrefix(params, "CACertPath")
+	parameters.OpenbaoTLSConfig.CAPath, _ = parseParametersPrefix(params, "CADirectory")
+	parameters.OpenbaoTLSConfig.TLSServerName, _ = parseParametersPrefix(params, "TLSServerName")
+	parameters.OpenbaoTLSConfig.ClientCert, _ = parseParametersPrefix(params, "TLSClientCertPath")
+	parameters.OpenbaoTLSConfig.ClientKey, _ = parseParametersPrefix(params, "TLSClientKeyPath")
+	k8sMountPath, k8sSet := parseParametersPrefix(params, "KubernetesMountPath")
+	authMountPath, authSet := parseParametersPrefix(params, "AuthMountPath")
 	switch {
 	case k8sSet && authSet:
 		return Parameters{}, fmt.Errorf("cannot set both openbaoKubernetesMountPath and openbaoAuthMountPath")
@@ -151,7 +168,7 @@ func parseParameters(parametersStr string) (Parameters, error) {
 	parameters.PodInfo.Namespace = params["csi.storage.k8s.io/pod.namespace"]
 	parameters.PodInfo.ServiceAccountName = params["csi.storage.k8s.io/serviceAccount.name"]
 	parameters.Audience = params["audience"]
-	if skipTLS, ok := params["openbaoSkipTLSVerify"]; ok {
+	if skipTLS, ok := parseParametersPrefix(params, "SkipTLSVerify"); ok {
 		value, err := strconv.ParseBool(skipTLS)
 		if err == nil {
 			parameters.OpenbaoTLSConfig.Insecure = value
