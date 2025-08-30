@@ -1,10 +1,15 @@
-## Unreleased
+## 2.0.0 (September 1st, 2025)
 
 CHANGES:
 
+- **BREAKING CHANGE** Updated SecretProviderClass configurations to use `provider: openbao` instead of `provider: vault` across various YAML files.
+- **BREAKING CHANGE** only works with openbao-helm chart version 0.17.1 forward
 - Introduced backwards compatibility for parameter prefixes in the CSI configuration. The prefixes "bao", "openbao", and "vault" are now accepted to retain compatibility with previous configurations.
-- Updated SecretProviderClass configurations to use `provider: openbao` instead of `provider: vault` across various YAML files:
 - Tested with k8s 1.32-1.34
+
+Full changes:
+
+https://github.com/openbao/openbao-csi-provider/compare/v1.5.0...v2.0.0
 
 ## 1.5.0 (June 23rd, 2025)
 
