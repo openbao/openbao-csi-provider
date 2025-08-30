@@ -54,6 +54,7 @@ csi:
     - -openbao-tls-client-key=/mnt/tls/client.key
 
   image:
+    registry: ""
     repository: "e2e/openbao-csi-provider"
     tag: "latest"
     pullPolicy: Never

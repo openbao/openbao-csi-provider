@@ -16,9 +16,9 @@ PKG=github.com/openbao/openbao-csi-provider/internal/version
 LDFLAGS?="-X '$(PKG).BuildVersion=$(VERSION)' \
 	-X '$(PKG).BuildDate=$(BUILD_DATE)' \
 	-X '$(PKG).GoVersion=$(shell go version)'"
-CSI_DRIVER_VERSION=1.5.1
-OPENBAO_HELM_VERSION=0.13.2
-OPENBAO_VERSION=2.2.2
+CSI_DRIVER_VERSION=1.5.3
+OPENBAO_HELM_VERSION=0.17.1
+OPENBAO_VERSION=2.4.0
 
 OPENBAO_VERSION_ARGS=--set server.image.tag=$(OPENBAO_VERSION)
 
