@@ -116,7 +116,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          version: v2.10.2
           args: release --clean --timeout=60m --verbose --parallelism 2
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
