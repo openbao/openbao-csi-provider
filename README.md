@@ -39,8 +39,7 @@ kubectl apply -f deployment/openbao-csi-provider.yaml
 
 ## Usage
 
-See the [learn tutorial](https://openbao.org/tutorials/openbao/kubernetes-secret-store-driver)
-and [documentation pages](https://openbao.org/docs/platform/k8s/csi) for
+See the [documentation pages](https://openbao.org/docs/platform/k8s/csi) for
 full details of deploying, configuring and using Openbao CSI provider. The
 integration tests in [test/bats/provider.bats](./test/bats/provider.bats) also
 provide a good set of fully worked and tested examples to build on.
