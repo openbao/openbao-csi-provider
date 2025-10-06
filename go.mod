@@ -1,6 +1,6 @@
 module github.com/openbao/openbao-csi-provider
 
-go 1.24.0
+go 1.24.7
 
 require (
 	github.com/hashicorp/go-hclog v1.6.3
@@ -13,7 +13,7 @@ require (
 	k8s.io/apimachinery v0.34.1
 	k8s.io/client-go v0.34.1
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
-	sigs.k8s.io/secrets-store-csi-driver v1.5.3
+	sigs.k8s.io/secrets-store-csi-driver v1.5.4
 )
 
 require (
