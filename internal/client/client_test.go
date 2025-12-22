@@ -122,7 +122,7 @@ func TestRequestSecret_OnlyAuthenticatesOnce(t *testing.T) {
 	}
 	defer mockOpenbaoServer.Close()
 
-	k8sClient := fake.NewSimpleClientset(
+	k8sClient := fake.NewClientset(
 		&corev1.ServiceAccount{},
 	)
 	authMethod := auth.NewKubernetesJWTAuth(hclog.Default(), k8sClient, config.Parameters{}, "")

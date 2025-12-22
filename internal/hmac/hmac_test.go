@@ -34,7 +34,7 @@ var secretSpec = &corev1.Secret{
 }
 
 func setup(t *testing.T) (*HMACGenerator, *fake.Clientset) {
-	client := fake.NewSimpleClientset()
+	client := fake.NewClientset()
 	return NewHMACGenerator(client, secretSpec), client
 }
 
