@@ -46,7 +46,7 @@ jobs:
           fetch-depth: 0 # Required by GoRelease
 
       - name: Golang Setup
-        uses: actions/setup-go@v6.3.0
+        uses: actions/setup-go@v6.4.0
         with:
           go-version: stable
           check-latest: true
