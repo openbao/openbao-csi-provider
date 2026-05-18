@@ -22,7 +22,7 @@ updates:
   - package-ecosystem: "gomod"
     directory: "/"
     groups:
-      actions:
+      go-deps:
         patterns:
           - "*"
     schedule:
