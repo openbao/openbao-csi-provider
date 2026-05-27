@@ -6,7 +6,6 @@ name: go checks
 on: [push, workflow_dispatch, pull_request]
 
 env:
-  GOFUMPT_VERSION: 14050252a6d591bb7a3f0167c925c3d6e6f9bdf8  # v0.10.0
   GOFUMPT_EXCLUDE_PATTERNS: "vendor,pb.go"
 
 jobs:
@@ -39,8 +38,6 @@ jobs:
           go-version-file: .go-version
       - name: Run gofumpt
         run: |
-          echo "==> Install gofumpt ${{ env.GOFUMPT_VERSION }}"
-          go install mvdan.cc/gofumpt@${{ env.GOFUMPT_VERSION }}
           echo "==> Checking that code complies with gofmt requirements..."
 
           files=$(find . -name '*.go')
@@ -51,7 +48,7 @@ jobs:
             files=$(echo $files | grep -v $pattern);
           done
           IFS=$OLDIFS
-          gofmt_files=$(gofmt -l $files)
+          gofmt_files=$(go tool -modfile=tools/go.mod gofumpt -l $files)
           if [[ -n ${gofmt_files} ]]; then
               echo 'gofmt needs running on the following files:'
               echo "${gofmt_files}"
