@@ -1,3 +1,6 @@
+# This file was originally sourced from:
+# https://github.com/hashicorp/vault-workflows-common/blob/main/.github/workflows/go-checks.y
+
 name: go checks
 
 on: [push, workflow_dispatch, pull_request]
