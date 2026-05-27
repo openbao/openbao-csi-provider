@@ -85,11 +85,20 @@ spec:
         app.kubernetes.io/name: openbao-csi-provider
     spec:
       serviceAccountName: openbao-csi-provider
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       tolerations:
       containers:
         - name: provider-openbao-installer
           image: openbao/openbao-csi-provider:1.4.0
           imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           args:
             - -endpoint=/provider/openbao.sock
             - -debug=false
