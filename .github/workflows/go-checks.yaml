@@ -1,0 +1,57 @@
+# This file was originally sourced from:
+# https://github.com/hashicorp/vault-workflows-common/blob/main/.github/workflows/go-checks.y
+
+name: go checks
+
+on: [push, workflow_dispatch, pull_request]
+
+env:
+  GOFUMPT_EXCLUDE_PATTERNS: "vendor,pb.go"
+
+jobs:
+  gomod:
+    name: Check that go.mod and go.sum are tidy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: .go-version
+      - name: Check go.mod and go.sum tidiness
+        run: |
+          go mod tidy
+          if [ ! -z "$(git status --porcelain go.mod go.sum)" ]; then
+            echo "Need to run 'go mod tidy'";
+            exit 1;
+          fi
+  gofumpt:
+    name: Check that code matches gofumpt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: .go-version
+      - name: Run gofumpt
+        run: |
+          echo "==> Checking that code complies with gofmt requirements..."
+
+          files=$(find . -name '*.go')
+          patterns='${{ env.GOFUMPT_EXCLUDE_PATTERNS }}'
+          OLDIFS=$IFS
+          IFS=","
+          for pattern in $patterns; do
+            files=$(echo $files | grep -v $pattern);
+          done
+          IFS=$OLDIFS
+          gofmt_files=$(go tool -modfile=tools/go.mod gofumpt -l $files)
+          if [[ -n ${gofmt_files} ]]; then
+              echo 'gofmt needs running on the following files:'
+              echo "${gofmt_files}"
+              echo "You can use the command: \`gofumpt -w\` to reformat them."
+              exit 1
+          fi
