@@ -9,8 +9,6 @@ env:
   TARBALL_FILE: openbao-csi-provider.docker.tar
 
 jobs:
-  go-checks:
-    uses: hashicorp/vault-workflows-common/.github/workflows/go-checks.yaml@main
   lint:
     runs-on: ubuntu-latest
     steps:

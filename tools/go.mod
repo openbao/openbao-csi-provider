@@ -2,6 +2,11 @@ module github.com/openbao/openbao-csi-provider/tools
 
 go 1.25.0
 
+tool (
+	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
+	mvdan.cc/gofumpt
+)
+
 require (
 	github.com/golangci/golangci-lint/v2 v2.1.6
 	github.com/hashicorp/copywrite v0.16.3
@@ -240,4 +245,3 @@ require (
 	mvdan.cc/unparam v0.0.0-20250301125049-0df0534333a4 // indirect
 )
 
-tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
