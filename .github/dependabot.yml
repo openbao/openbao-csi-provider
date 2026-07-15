@@ -20,7 +20,9 @@ updates:
     cooldown:
       default-days: 7
   - package-ecosystem: "gomod"
-    directory: "/"
+    directories: 
+      - "/"
+      - "/tools"
     groups:
       go-deps:
         patterns:
