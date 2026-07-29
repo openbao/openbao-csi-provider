@@ -89,11 +89,35 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       tolerations:
+      initContainers:
+        - name: prepare-provider-dir
+          image: openbao/openbao-csi-provider:2.0.2
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - chown 1000:1000 /provider
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+          volumeMounts:
+            - name: providervol
+              mountPath: "/provider"
       containers:
         - name: provider-openbao-installer
-          image: openbao/openbao-csi-provider:1.4.0
+          image: openbao/openbao-csi-provider:2.0.2
           imagePullPolicy: Always
           securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
