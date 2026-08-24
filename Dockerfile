@@ -4,7 +4,7 @@
 # This Dockerfile contains multiple targets.
 # Use 'docker build --target=<name> .' to build one.
 
-ARG ALPINE_VERSION=3.22.0
+ARG ALPINE_VERSION=3.24.0
 ARG GO_VERSION=latest
 
 # devbuild compiles the binary
@@ -24,7 +24,7 @@ ENTRYPOINT [ "/bin/openbao-csi-provider" ]
 
 # Default release image.
 # -----------------------------------
-FROM docker.mirror.hashicorp.services/alpine:${ALPINE_VERSION} AS default
+FROM alpine:${ALPINE_VERSION} AS default
 
 ARG PRODUCT_VERSION
 ARG PRODUCT_REVISION
