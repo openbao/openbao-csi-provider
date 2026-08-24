@@ -22,16 +22,12 @@ OPENBAO_VERSION=2.4.0
 
 OPENBAO_VERSION_ARGS=--set server.image.tag=$(OPENBAO_VERSION)
 
-.PHONY: default build test bootstrap fmt lint image e2e-image e2e-setup e2e-teardown e2e-test mod setup-kind promote-staging-manifest copyright
+.PHONY: default build test fmt lint image e2e-image e2e-setup e2e-teardown e2e-test mod setup-kind promote-staging-manifest copyright
 
 GO111MODULE?=on
 export GO111MODULE
 
 default: test
-
-bootstrap:
-	@echo "Downloading tools..."
-	@go generate -tags tools tools/tools.go
 
 fmt:
 	gofumpt -l -w .
