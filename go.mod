@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/openbao/openbao/api/v2 v2.7.0
+	github.com/openbao/openbao/api/v2 v2.7.1
 	github.com/stretchr/testify v1.12.1
 	google.golang.org/grpc v1.84.0
 	gopkg.in/yaml.v3 v3.0.1
