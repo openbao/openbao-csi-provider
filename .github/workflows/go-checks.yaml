@@ -36,6 +36,12 @@ jobs:
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: .go-version
+      - name: Install gofumpt
+        run: |
+          wget https://github.com/mvdan/gofumpt/releases/download/v0.11.0/gofumpt_v0.11.0_linux_amd64
+          mv gofumpt_v0.11.0_linux_amd64 gofumpt
+          chmod +x gofumpt
+          mv gofumpt /usr/local/bin
       - name: Run gofumpt
         run: |
           echo "==> Checking that code complies with gofmt requirements..."
@@ -48,7 +54,7 @@ jobs:
             files=$(echo $files | grep -v $pattern);
           done
           IFS=$OLDIFS
-          gofmt_files=$(go tool -modfile=tools/go.mod gofumpt -l $files)
+          gofmt_files=$(gofumpt -l $files)
           if [[ -n ${gofmt_files} ]]; then
               echo 'gofmt needs running on the following files:'
               echo "${gofmt_files}"
